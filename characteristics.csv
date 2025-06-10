@@ -1,0 +1,256 @@
+,abr_hxz,name,name_new,abr_jkp,time_to_create,lagged_denom,cite,variations,group,in-sample period,t-stat,p-value,direction,significance,controls
+0,Sue,Earnings surprise,Standardized earnings surprise,niq_su,,,Foster Olsen and Shevlin (1984),3.0,Momentum,1974 - 1981,9.11,,1.0,1.0,2.0
+1,Abr,Cumulative abnormal stock returns around earnings announcements,Cumulative abnormal stock returns around earnings announcements,,3,,Chan Jegadeesh and Lakonishok (1996) 1972/1,3.0,Momentum,1977 - 1993,4.25,,1.0,,2.0
+2,Re,Revisions in analystsâ€™ earnings forecasts,Revisions in analystsâ€™ earnings forecasts,,A,,Chan Jegadeesh and Lakonishok (1996) 1976/7,3.0,Momentum,1977 - 1993,3.1,,1.0,,2.0
+3,R6,"Price momentum,  prior 6-month returns",Price momentum t-6 to t-1,ret_6_1,,,Jegadeesh and Titman (1993),3.0,Momentum,1965 - 1989,2.29,,1.0,1.0,0.0
+4,R11,"Price momentum, prior 11-month returns",Price momentum t-12 to t-1,ret_12_1,,,Jegadeesh and Titman (1993),3.0,Momentum,1965 - 1989,,,1.0,1.0,0.0
+5,Im,Industry momentum,Industry momentum,,I,,Moskowitz and Grinblatt (1999),3.0,Momentum,1973 - 1995,2.08,,1.0,,1.0
+6,Rs,Revenue surprise,Standardized Revenue surprise,saleq_su,,,Jegadeesh and Livnat (2006),3.0,Momentum,1987 - 2003,,<1%,1.0,1.0,2.0
+7,Tes,Tax expense surprise,Tax expense surprise,tax_gr1a,,,Thomas and Zhang (2011),3.0,Momentum,1977 - 2006,6.42,,1.0,1.0,2.0
+8,dEf,Change in analystsâ€™ earnings forecasts,Change in analystsâ€™ earnings forecasts,,A,,Hawkins Chamberlin and Daniel (1984) 1976/3,3.0,Momentum,1975 - 1980,,,,,0.0
+9,Nei,Number of consecutive quarters with earnings increases,Number of consecutive quarters with earnings increases,ni_inc8q,,,Barth Elliott and Finn (1999),3.0,Momentum,1982 - 1992,,,1.0,0.0,0.0
+10,52w,52-week high,Current price to high price over last year,prc_highprc_252d,,,George and Hwang (2004),3.0,Momentum,1963 - 2001,"min: 2.83, max: 8.39",,1.0,1.0,2.0
+11,e6,"Residual momentum,  prior 6-month returns",Residual momentum t-6 to t-1,resff3_6_1,,,Blitz Huij and Martens (2011),3.0,Momentum,1930 - 2009,,0.65,1.0,1.0,0.0
+12,e11,"Residual momentum, prior 11-month returns",Residual momentum t-12 to t-1,resff3_12_1,,,Blitz Huij and Martens (2011),3.0,Momentum,1930 - 2009,,0.59,1.0,1.0,0.0
+13,Sm,Segment momentum,Segment momentum,,G,,Cohen and Lou (2012) 1977/7,3.0,Momentum,1977 - 2009,"min: 2.56, max: 7.41",<5%,1.0,,2.0
+14,Ilr,Industry lead-lag effect in prior returns,Industry lead-lag effect in prior returns,,I,,Hou (2007),3.0,Momentum,1972 - 2001,11,,1.0,,2.0
+15,Ile,Industry lead-lag effect in earnings surprises,Industry lead-lag effect in earnings surprises,,I,,Hou (2007),3.0,Momentum,1972 - 2001,5.61,,1.0,,2.0
+16,Cm,Customer momentum,Customer momentum,,G,,Cohen and Frazzini (2008),3.0,Momentum,1980 - 2004,2.26,<5%,1.0,,2.0
+17,Sim,Supplier industries momentum,Supplier industries momentum,,GI,,Menzly and Ozbas (2010),3.0,Momentum,1963 - 2005,5.03,<1%,1.0,,2.0
+18,Cim,Customer industries momentum,Customer industries momentum,,GI,,Menzly and Ozbas (2010),3.0,Momentum,1963 - 2005,4.11,<1%,1.0,,2.0
+19,Bm,Book-to-market equity,Book-to-market equity,be_me,,,Rosenberg Reid and Lanstein (1985),1.0,VALUE,1973 - 1984,,,1.0,1.0,0.0
+20,Bmj,Book-to-June-end market equity,Book-to-June-end market equity,,Q,,Asness and Frazzini (2013),1.0,VALUE,,,,1.0,,0.0
+21,Bmq,Quarterly book-to-market equity,Quarterly book-to-market equity,,Q,,,3.0,VALUE,,,,1.0,,
+22,Dm,Debt-to-market,Debt-to-market,debt_me,,,Bhandari (1988),1.0,VALUE,1948 - 1979,3.93,,1.0,1.0,1.0
+23,Dmq,Quarterly debt-to-market,Quarterly debt-to-market,,Q,,1972/1,3.0,VALUE,,,,1.0,,
+24,Am,Assets-to-market,Assets-to-market,at_me,,,Fama and French (1992),1.0,VALUE,1963 - 1990,4.28,,1.0,0.0,2.0
+25,Amq,Quarterly assets-to-market,Quarterly assets-to-market,,Q,,1972/1,3.0,VALUE,,,,1.0,,
+26,Rev,Long-term reversal,Long-term reversal,ret_60_12,,,De Bondt and Thaler (1985),3.0,VALUE,1926 - 1982,,,-1.0,1.0,0.0
+27,Ep,Earnings-to-price,Earnings-to-price,ni_me,,,Basu (1983),1.0,VALUE,1963-1979,,,1.0,1.0,0.0
+28,Epq,Quarterly earnings-to-price,Quarterly earnings-to-price,,Q,,,3.0,VALUE,,,,1.0,,
+29,Efp,Analystsâ€™ earnings forecasts-to-price,Analystsâ€™ earnings forecasts-to-price,,A,,Elgers Lo and Pfeiffer (2001) 1976/2,3.0,VALUE,1982 - 1998,3.4,<1%,1.0,,1.0
+30,Cp,Cash flow-to-price,Free cash flow-to-price,fcf_me,,,Lakonishok Shleifer and Vishny (1994),1.0,VALUE,1963 - 1990,,,1.0,1.0,
+31,Cpq,Quarterly cash flow-to-price,Quarterly cash flow-to-price,,Q,,,3.0,VALUE,,,,1.0,,
+32,Dp,Dividend yield,Dividend yield,div12m_me,,,Litzenberger and Ramaswamy (1979),1.0,VALUE,1940 -1980,8.79,,1.0,1.0,1.0
+33,Dpq,Quarterly dividend yield,Quarterly dividend yield,,Q,,,3.0,VALUE,,,,1.0,,
+34,Op,Payout yield,Payout yield,eqpo_me,,,Boudoukh et al. (2007),1.0,VALUE,1984 - 2003,2.24,,1.0,1.0,1.0
+35,Opq,Quarterly payout yield,Quarterly payout yield,,Q,,1985/1,3.0,VALUE,,,,1.0,,
+36,Nop,Net payout yield,Net payout yield,eqnpo_me,,,Boudoukh et al. (2007),1.0,VALUE,1984 - 2003,4.14,,1.0,1.0,1.0
+37,Nopq,Quarterly net payout yield,Quarterly net payout yield,,Q,,1985/1,3.0,VALUE,,,,1.0,,
+38,Sr,5-year sales growth rank,Sales Growth (3 years),sale_gr3,,,Lakonishok Shleifer and Vishny (1994),1.0,VALUE,1968 - 1989,-2.125,,-1.0,1.0,2.0
+39,Sg,Annual sales growth,Sales Growth (1 year),sale_gr1,,,Lakonishok Shleifer and Vishny (1994),1.0,VALUE,1968 - 1989,,,-1.0,1.0,0.0
+40,Em,Enterprise multiple,Ebitda-to-market enterprise value,ebitda_mev,,,Loughran and Wellman (2011),1.0,VALUE,1963 - 2009,3.08,,1.0,1.0,2.0
+41,Emq,Quarterly enterprise multiple,Quarterly enterprise multiple,,Q,,1976/1,3.0,VALUE,,,,1.0,,
+42,Sp,Sales-to-price,Sales-to-market,sale_me,,,Barbee Mukherji and Raines (1996),1.0,VALUE,1979-1991,2.21,<5%,1.0,1.0,2.0
+43,Spq,Quarterly sales-to-price,Quarterly sales-to-price,,Q,,,3.0,VALUE,,,,1.0,,
+44,Ocp,Operating cash flow-to-price,Operating cash flow-to-market,ocf_me,,,Desai Rajgopal and Venkatachalam (2004),1.0,VALUE,1973 - 1997,8.36,<1%,1.0,1.0,2.0
+45,Ocpq,Quarterly operating cash flow-to-price,Quarterly operating cash flow-to-price,,Q,,1985/1,3.0,VALUE,,,,1.0,,
+46,Ir,Intangible return,Intangible return,,3,,Daniel and Titman (2006),1.0,VALUE,1968 - 2003,-4.56,,-1.0,,2.0
+47,Vhp,Intrinsic value-to-market,Intrinsic value-to-market,ival_me,,,Frankel and Lee (1998),1.0,VALUE,1975 - 1993,,,1.0,0.0,
+48,Vfp,Analystsâ€™ forecasts-based intrinsic value-to-market,Analystsâ€™ forecasts-based intrinsic value-to-market,,A,,Frankel and Lee (1998) 1976/7,1.0,VALUE,1976 - 1992,,<5%,1.0,,2.0
+49,Ebp,Enterprise book-to-price,Book-to-market enterprise value,bev_mev,,,Penman Richardson and Tuna (2007),1.0,VALUE,1962 - 2001,4.2,,1.0,1.0,1.0
+50,Ebpq,Quarterly enterprise book-to-price,Quarterly enterprise book-to-price,,Q,,1976/1,3.0,VALUE,,,,1.0,,
+51,Ndp,Net debt-to-price,Net debt-to-price,netdebt_me,,,Penman Richardson and Tuna (2007),1.0,VALUE,1962 - 2001,-3.12,,-1.0,1.0,1.0
+52,Ndpq,Quarterly net debt-to-price,Quarterly net debt-to-price,,Q,,1976/1,3.0,VALUE,,,,1.0,,
+53,Dur,Equity duration,Equity duration,eq_dur,,,Dechow Sloan and Soliman (2004),1.0,VALUE,1962 - 1998,4.63,,-1.0,1.0,2.0
+54,Ltg,Long-term growth forecasts of analysts,Long-term growth forecasts of analysts,,A,,La Porta (1996) 1982/1,1.0,VALUE,1982 - 1991,-4.1902,,-1.0,,
+55,Ltgm,Long-term growth forecasts of analysts,Long-term growth forecasts of analysts,,A,,,1.0,VALUE,,,,-1.0,,
+56,Aci,Abnormal corporate investment,Abnormal corporate investment,capex_abn,,,Titman Wei and Xie (2004),1.0,INVESTMENT,1973 - 1996,-2.76,<5%,-1.0,1.0,2.0
+57,I/A,Investment-to-assets,Asset Growth,at_gr1,,,Cooper Gulen and Schill (2008),1.0,INVESTMENT,1968 - 2003,-5.04,,-1.0,1.0,0.0
+58,Iaq,Quarterly investment-to-assets,Quarterly investment-to-assets,,Q,,1973/1,3.0,INVESTMENT,,,,-1.0,,
+59,dPia,"Change in property, pant and equiptment and equipment and inventory scaled by book assets",Change PPE and Inventory,ppeinv_gr1a,,,Lyandres Sun and Zhang (2008),1.0,INVESTMENT,1970 - 2005,,,-1.0,1.0,0.0
+60,Noa,Net operating assets,Net operating assets,noa_at,,,Hirshleifer et al. (2004),1.0,INVESTMENT,1964-2002,-4.04,<5%,-1.0,1.0,2.0
+61,dNoa,Change in net operating assets,Change in net operating assets,noa_gr1a,,,Hirshleifer et al. (2004),1.0,INVESTMENT,1964-2002,0.17,>5%,-1.0,1.0,2.0
+62,dLno,Change in long-term net operating assets,Change in long-term net operating assets,lnoa_gr1a,,,Fairfield Whisenant and Yohn (2003),1.0,INVESTMENT,1964 - 1993,,,-1.0,1.0,1.0
+63,Ig,Investment growth,CAPEX growth (1 year),capx_gr1,,,Xie (2001),1.0,INVESTMENT,1971-1992,,,-1.0,0.0,0.0
+64,2Ig,2-year investment growth,CAPEX growth (2 years),capx_gr2,,,Anderson and Garcia-Feijoo (2006),1.0,INVESTMENT,1976 - 1998,-5.51,,-1.0,1.0,1.0
+65,3Ig,3-year investment growth,CAPEX growth (3 years),capx_gr3,,,Anderson and Garcia-Feijoo (2006),1.0,INVESTMENT,1976 - 1998,-5.34,,-1.0,1.0,1.0
+66,Nsi,Net stock issues,Net stock issues,chcsho_12m,,,Pontiff and Woodgate (2008),1.0,INVESTMENT,1970 - 2003,-6.72,,-1.0,1.0,2.0
+67,dIi,Percentage change in investment relative to industry,Percentage change in investment relative to industry,,I,,Abarbanell and Bushee (1998),1.0,INVESTMENT,,,,,,0.0
+68,Cei,Composite equity issuance,Equity net payout,eqnpo_12m,,,Daniel and Titman (2006),1.0,INVESTMENT,1968 - 2003,-4.16,,1.0,1.0,2.0
+69,Cdi,Composite debt issuance,Growth in book debt (3 years),debt_gr3,,,Lyandres Sun and Zhang (2008),1.0,INVESTMENT,1970 - 2005,-5.91,,-1.0,1.0,1.0
+70,Ivg,Inventory growth,Inventory growth,inv_gr1,,,Belo and Lin (2011),1.0,INVESTMENT,1965 - 2009,6.64,,-1.0,1.0,0.0
+71,Ivc,Inventory changes,Inventory change,inv_gr1a,,,Thomas and Zhang (2002),1.0,INVESTMENT,1970 - 1997,,<1%,-1.0,1.0,2.0
+72,Oa,Operating accruals,Operating accruals,oaccruals_at,,,Sloan (1996),1.0,INVESTMENT,1962 - 1991,-6.15,<1%,-1.0,1.0,1.0
+73,Ta,Total accruals,Total accruals,taccruals_at,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-6.38,,-1.0,1.0,2.0
+74,dWc,Change in net noncash working capital,Change in current operating working capital,cowc_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-8.72,,-1.0,1.0,2.0
+75,dCoa,Change in current operating assets,Change in current operating assets,coa_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-8.71,,-1.0,1.0,2.0
+76,dCol,Change in current operating liabilities,Change in current operating liabilities,col_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-4.49,,-1.0,1.0,2.0
+77,dNco,Change in net noncurrent operating assets,Change in net noncurrent operating assets,nncoa_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-8.76,,-1.0,1.0,2.0
+78,dNca,Change in noncurrent operating assets,Change in noncurrent operating assets,ncoa_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-8.44,,-1.0,1.0,2.0
+79,dNcl,Change in noncurrent operating liabilities,Change in noncurrent operating liabilities,ncol_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-0.65,,-1.0,0.0,2.0
+80,dFin,Change in net financial assets,Change in net financial assets,nfna_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,5.85,,1.0,1.0,2.0
+81,dSti,Change in short-term investments,Change in short-term investments,sti_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,0.43,,1.0,0.0,2.0
+82,dLti,Change in long-term investments,Change in long-term investments,lti_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-3.38,,-1.0,1.0,2.0
+83,dFnl,Change in financial liabilities,Change in financial liabilities,fnl_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-8.01,,-1.0,1.0,2.0
+84,dBe,Change in common equity,Change in common equity,be_gr1a,,,Richardson et al. (2005),1.0,INVESTMENT,1962 - 2001,-6.25,,-1.0,1.0,2.0
+85,Dac,Discretionary accruals,Discretionary accruals,,I3,,Xie (2001),1.0,INVESTMENT,1971 - 1992,8.43,<1%,-1.0,,0.0
+86,Poa,Percent operating accruals,Percent operating accruals,oaccruals_ni,,,Hafzalla Lundholm and Van Winkle (2011),1.0,INVESTMENT,1989 - 2008,,<1%,-1.0,1.0,2.0
+87,Pta,Percent total accruals,Percent total accruals,taccruals_ni,,,Hafzalla Lundholm and Van Winkle (2011),1.0,INVESTMENT,1989 - 2008,,<1%,-1.0,1.0,0.0
+88,Pda,Percent discretionary accruals,Percent discretionary accruals,,I3,,,1.0,INVESTMENT,,,,,,
+89,Nxf,Net external finance,Net total issuance,netis_at,,,Bradshaw Richardson and Sloan (2006),1.0,INVESTMENT,1971 - 2000,-5.7,,-1.0,1.0,0.0
+90,Nef,Net equity finance,Net equity issuance,eqnetis_at,,,Bradshaw Richardson and Sloan (2006),1.0,INVESTMENT,1971 - 2000,-3.2,,-1.0,1.0,2.0
+91,Ndf,Net debt finance,Net debt issuance,dbnetis_at,,,Bradshaw Richardson and Sloan (2006),1.0,INVESTMENT,1971 - 2000,-8.4,,-1.0,1.0,2.0
+92,Roe,Return on equity,Quarterly return on equity,niq_be,,,Hou Xue and Zhang (2015),3.0,Profitability,1972 - 2012,3.11,,1.0,1.0,0.0
+93,dRoe,4-quarter change in return on equity,Change in quarterly return on equity,niq_be_chg1,,,,3.0,Profitability,1967 - 2016,,,1.0,0.0,
+94,Roa,Return on assets,Quarterly return on assets,niq_at,,,Balakrishnan Bartov and Faurel (2010),3.0,Profitability,1976 - 2005,,,1.0,1.0,0.0
+95,dRoa,4-quarter change in return on assets,Change in quarterly return on assets,niq_at_chg1,,,,3.0,Profitability,1972 - 2016,,,1.0,0.0,
+96,Rna,Return on net operating assets,Return on net operating assets,ebit_bev,,1.0,Soliman (2008),1.0,Profitability,1984 - 2002,1.41,,1.0,1.0,2.0
+97,Rnaq,Quarterly return on net operating assets,Quarterly return on net operating assets,,Q,,1976/1,3.0,Profitability,,,,1.0,,
+98,Pm,Profit margin,Profit margin,ebit_sale,,,Soliman (2008),1.0,Profitability,1984 - 2002,1.04,,1.0,1.0,2.0
+99,Pmq,Quarterly profit margin,Quarterly profit margin,,Q,,,3.0,Profitability,,,,1.0,,
+100,Ato,Asset turnover,Asset turnover,sale_bev,,1.0,Soliman (2008),1.0,Profitability,1984 - 2002,0.29,,1.0,1.0,2.0
+101,Atoq,Quarterly asset turnover,Quarterly asset turnover,,Q,,1972/1,3.0,Profitability,,,,1.0,,
+102,Cto,Capital turnover,Capital turnover,at_turnover,,1.0,Haugen and Baker (1996),1.0,Profitability,1979 - 1993,,,1.0,0.0,0.0
+103,Ctoq,Quarterly capital turnover,Quarterly capital turnover,,Q,,1972/1,3.0,Profitability,,,,1.0,,
+104,Gpa,Gross profits-to-assets,Gross profits-to-assets,gp_at,,,Novy-Marx (2013),1.0,Profitability,1963 - 2010,4.59,,1.0,1.0,2.0
+105,Gla,Gross profits-to-lagged assets,Gross profits-to-lagged assets,gp_atl1,,1.0,,1.0,Profitability,1967 - 2016,,,1.0,0.0,
+106,Glaq,Quarterly gross profits-to-assets,Quarterly gross profits-to-assets,,Q,,1976/1,3.0,Profitability,,,,1.0,,
+107,Ope,Operating profits-to-book equity,Operating profits-to-book equity,ope_be,,,Fama and French (2015),1.0,Profitability,1963 - 2013,2.92,,1.0,1.0,2.0
+108,Ole,Operating profits-to-lagged book equity,Operating profits-to-lagged book equity,ope_bel1,,1.0,,1.0,Profitability,1967 - 2016,,,1.0,0.0,
+109,Oleq,Quarterly operating profits-to-lagged book equity,Quarterly operating profits-to-lagged book equity,,Q,,1972/1,3.0,Profitability,,,,1.0,,
+110,Opa,Operating profits-to-book assets,Operating profits-to-book assets,op_at,,,,1.0,Profitability,1963 - 2013,,,1.0,1.0,
+111,Ola,Operating profits-to-lagged book assets,Operating profits-to-lagged book assets,op_atl1,,1.0,Ball et al. (2016),1.0,Profitability,1963 - 2014,8.86,,1.0,1.0,2.0
+112,Olaq,Quarterly operating profits-to-lagged book assets,Quarterly operating profits-to-lagged book assets,,Q,,1976/1,3.0,Profitability,,,,1.0,,
+113,Cop,Cash-based operating profits-to-book assets,Cash-based operating profits-to-book assets,cop_at,,,,1.0,Profitability,1967 - 2016,,,1.0,0.0,
+114,Cla,Cash-based operating profits-to-lagged book assets,Cash-based operating profits-to-lagged book assets,cop_atl1,,1.0,Ball et al. (2016),1.0,Profitability,1963 - 2014,5.27,,1.0,1.0,2.0
+115,Claq,Quarterly cash-based operating profits-to-lagged book assets,Quarterly cash-based operating profits-to-lagged book assets,,Q,,1976/1,3.0,Profitability,,,,1.0,,
+116,F,Fundamental score,Pitroski F-score,f_score,,,Piotroski (2000),1.0,Profitability,1976 - 1996,5.889,,1.0,1.0,2.0
+117,Fq,Quarterly fundamental score,Quarterly fundamental score,,Q,,1985/1,3.0,Profitability,,,,1.0,,
+118,Fp,Failure probability,Failure probability,,3,,Campbell Hilscher and Szilagyi (2008) 1976/7,1.0,Profitability,,,,-1.0,,
+119,Fpm,Failure probability,Failure probability,,Q,,Campbell Hilscher and Szilagyi (2008) 1976/1,3.0,Profitability,,,,-1.0,,
+120,O,Ohlsonâ€™s (1980) O-score,Ohlson O-score,o_score,,,Dichev (1998),1.0,Profitability,1981 - 1995,-3.38,,-1.0,1.0,2.0
+121,Oq,Quarterly O-score,Quarterly O-score,,Q,,1976/1,3.0,Profitability,,,,-1.0,,
+122,Z,Altmanâ€™s (1968) Z-score,Altman Z-score,z_score,,,Dichev (1998),1.0,Profitability,1981 - 1995,3.37,,1.0,1.0,2.0
+123,Zq,Quarterly Z-score,Quarterly Z-score,,Q,,1976/1,3.0,Profitability,,,,1.0,,
+124,Cr,Credit rating,Credit rating,,O,,Avramov et al. (2009) 1986/1,3.0,Profitability,1985 - 2007,-2.8,<5%,-1.0,,2.0
+125,Tbi,Taxable income-to-book income,Taxable income-to-book income,pi_nix,,,Lev and Nissim (2004),1.0,Profitability,1973-2000,"3.851, 0.486",,1.0,1.0,1.0
+126,Tbiq,Quarterly taxable income-to-book income,Quarterly taxable income-to-book income,,Q,,,3.0,Profitability,,,,1.0,,
+127,G,Growth score,Growth score,,I,,Mohanram (2005) 1976/7,1.0,Profitability,1979 - 2001,5.53,<1%,1.0,,2.0
+128,Bl,Book leverage,Book leverage,at_be,,,Fama and French (1992),1.0,Profitability,1963 - 1990,-4.45,,-1.0,0.0,2.0
+129,Blq,Quarterly book leverage,Quarterly book leverage,,Q,,1972/1,3.0,Profitability,,,,-1.0,,
+130,Sgq,Quarterly sales growth,Sales growth (1 quarter),saleq_gr1,,,,3.0,Profitability,1967 - 2016,,,-1.0,0.0,
+131,Oca,Organizational capital-to-book assets,Organizational capital-to-book assets,,O,,Eisfeldt and Papanikolaou (2013),1.0,INTANGIBLES,1970 - 2008,2.85,,1.0,,0.0
+132,Ioca,Industry-adjusted organizational capital-to-book assets,Industry-adjusted organizational capital-to-book assets,,I,,Eisfeldt and Papanikolaou (2013),1.0,INTANGIBLES,,,,,,
+133,Adm,Advertising expense-to-market,Advertising expense-to-market,,G,,Chan Lakonishok and Sougiannis (2001) 1973/7,1.0,INTANGIBLES,1975 - 1995,,,1.0,,0.0
+134,gAd,Growth in advertising expense,Growth in advertising expense,,G,,Lou (2014) 1974/7,1.0,INTANGIBLES,1974 - 2010,,>95%,-1.0,,2.0
+135,Rdm,R&D expense-to-market,R&D-to-market,rd_me,,,Chan Lakonishok and Sougiannis (2001),1.0,INTANGIBLES,1975 - 1995,,,1.0,1.0,0.0
+136,Rdmq,Quarterly R&D expense-to-market,Quarterly R&D expense-to-market,,Q,,1990/1,3.0,INTANGIBLES,,,,1.0,,
+137,Rds,R&D expense-to-sales,R&D-to-sales,rd_sale,,,Chan Lakonishok and Sougiannis (2001),1.0,INTANGIBLES,1975 - 1995,,,1.0,0.0,0.0
+138,Rdsq,Quarterly R&D expense-to-sales,Quarterly R&D expense-to-sales,,Q,,1990/1,3.0,INTANGIBLES,,,,1.0,,
+139,Ol,Operating leverage,Operating leverage,opex_at,,,Novy-Marx (2011),1.0,INTANGIBLES,1963 - 2008,2.52,,1.0,1.0,2.0
+140,Olq,Quarterly operating leverage,Quarterly operating leverage,,Q,,1973/1,3.0,INTANGIBLES,,,,1.0,,
+141,Hn,Hiring rate,Hiring rate,emp_gr1,,,Belo Lin and Bazdresch (2014),1.0,INTANGIBLES,1965 - 2010,-3.09,,-1.0,1.0,2.0
+142,Rca,R&D capital-to-book assets,R&D capital-to-book assets,rd5_at,,,Li (2011),1.0,INTANGIBLES,1952 - 2004,,,1.0,0.0,0.0
+143,Bca,Brand capital-to-book assets,Brand capital-to-book assets,,G,,Belo Lin and Vitorino (2014) 1973/7,1.0,INTANGIBLES,,,,,,0.0
+144,Aop,Analysts optimism,Analysts optimism,,A,,Frankel and Lee (1998) 1976/7,1.0,INTANGIBLES,1977 - 1991,,<1%,-1.0,,0.0
+145,Pafe,Predicted analysts forecast error,Predicted analysts forecast error,,A,,Frankel and Lee (1998) 1985/7,1.0,INTANGIBLES,1976 - 1992,,<5%,-1.0,,2.0
+146,Parc,Patent-to-R&D capital,Patent-to-R&D capital,,G,,Hirshleifer Hsu and Li (2013) 1982/7â€“2008/6,1.0,INTANGIBLES,1982 - 2008,1.81,,1.0,,2.0
+147,Crd,Citations-to-R&D expense,Citations-to-R&D expense,,G,,Hirshleifer Hsu and Li (2013) 1983/7â€“2008/6,1.0,INTANGIBLES,1982 - 2008,2.92,,1.0,,2.0
+148,Hs,Industry concentration in sales,Industry concentration in sales,,I,,Hou and Robinson (2006),1.0,INTANGIBLES,1963 - 2001,-2.85,,-1.0,,1.0
+149,Ha,Industry concentration in total assets,Industry concentration in total assets,,I,,Hou and Robinson (2006),1.0,INTANGIBLES,1963 - 2001,-2.12,,-1.0,,0.0
+150,He,Industry concentration in book equity,Industry concentration in book equity,,I,,Hou and Robinson (2006),1.0,INTANGIBLES,1963 - 2001,-2.28,,-1.0,,0.0
+151,Age,Firm age,Firm age,age,,,Jiang Lee and Zhang (2005),3.0,INTANGIBLES,1965 - 2001,-3.46,,-1.0,1.0,0.0
+152,D1,Price delay based on R2,Price delay based on R2,,3,,Hou and Moskowitz (2005),1.0,INTANGIBLES,1966 - 2001,4.37,,1.0,,2.0
+153,D2,Price delay based on slopes,Price delay based on slopes,,3,,Hou and Moskowitz (2005),1.0,INTANGIBLES,1964 - 2001,7.7,,1.0,,0.0
+154,D3,Price delay based on adjusted slopes,Price delay based on adjusted slopes,,3,,Hou and Moskowitz (2005),1.0,INTANGIBLES,1964 - 2001,7.39,,1.0,,0.0
+155,dSi,Percentage change in sales minus percentage change in inventory,Change sales minus change Inventory,dsale_dinv,,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,2.063,<5%,1.0,1.0,2.0
+156,dSa,Percentage change in sales minus percentage change in accounts receivable,Change sales minus change receivables,dsale_drec,,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,-0.015,,-1.0,0.0,2.0
+157,dGs,Percentage change in gross margin minus percentage change in sales,Change gross margin minus change sales,dgp_dsale,,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,1.304,,1.0,0.0,2.0
+158,dSs,Percentage change in sales minus percentage change in SG&A,Change sales minus change SG&A,dsale_dsga,,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,1.363,,1.0,0.0,2.0
+159,Etr,Effective tax rate,Effective tax rate,,G,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,0.116,,1.0,,2.0
+160,Lfe,Labor force efficiency,Labor force efficiency,sale_emp_gr1,,,Abarbanell and Bushee (1998),1.0,INTANGIBLES,1974 - 1988,1.113,,1.0,0.0,2.0
+161,Ana,Analysts coverage,Analysts coverage,,A,,Elgers Lo and Pfeiffer (2001) 1976/2,3.0,INTANGIBLES,1982 - 1998,,,1.0,,0.0
+162,Tan,Tangibility of assets,Asset tangibility,tangibility,,,Hahn and Lee (2009),1.0,INTANGIBLES,1973-2001,5.04,,1.0,0.0,2.0
+163,Tanq,Quarterly tangibility of assets,Quarterly tangibility of assets,,Q,,1972/1,3.0,INTANGIBLES,,,,1.0,,
+164,Rer,Real estate ratio,Real estate ratio,,I,,Tuzel (2010) 1970/7,1.0,INTANGIBLES,1971 - 2005,1.8,,1.0,,0.0
+165,Kz,The Kaplan-Zingales (1997) index of financing constraints,Kaplan-Zingales index,kz_index,,,Lamont Polk and Saa-Requejo (2001),1.0,INTANGIBLES,1968-1995,3.06,,1.0,1.0,0.0
+166,Kzq,Quarterly Kaplan-Zingales index,Quarterly Kaplan-Zingales index,,Q,,1977/1,3.0,INTANGIBLES,,,,1.0,,
+167,Ww,The Whited-Wu index of financing constraints,The Whited-Wu index of financing constraints,,I,,Whited and Wu (2006),1.0,INTANGIBLES,1975 - 2001,3.17,,1.0,,2.0
+168,Wwq,Quarterly Whited-Wu index of financing constraints,Quarterly Whited-Wu index of financing constraints,,Q,,1972/1,3.0,INTANGIBLES,,,,1.0,,
+169,Sdd,Secured debt-to-total debt,Secured debt-to-total debt,,G,,Valta (2016) 1982/7,1.0,INTANGIBLES,1985 - 2012,,<5%,1.0,,2.0
+170,Cdd,Convertible debt-to-total debt,Convertible debt-to-total debt,,G,,Valta (2016) 1970/7,1.0,INTANGIBLES,1985 - 2012,,<1%,1.0,,2.0
+171,Vcf,Cash flow volatility,Cash flow volatility,ocfq_saleq_std,,,Huang (2009),3.0,INTANGIBLES,1980 - 2004,-1.98,<5%,-1.0,1.0,1.0
+172,Cta,Cash-to-assets,Cash-to-assets,cash_at,,,Palazzo (2012),3.0,INTANGIBLES,1972 - 2009,"min: 1.66, max: 2.87",,1.0,0.0,0.0
+173,Gind,Corporate governance,Corporate governance,,G,,Gompers Ishii and Metrick (2003) 1990/9â€“2006/12,1.0,INTANGIBLES,1990 - 1999,0.04,,1.0,,2.0
+174,Acq,Accrual quality,Accrual quality,,I,,Francis et al. (2005),1.0,INTANGIBLES,1975 - 2001,47.85,,1.0,,2.0
+175,Acqm,Accrual quality,Accrual quality,,Q,,,3.0,INTANGIBLES,,,,1.0,,
+176,Ob,Order backlog,Order backlog,,G,,Rajgopal Shevlin and Venkatachalam (2003) 1971/7,1.0,INTANGIBLES,1981 - 1999,-2.12,<5%,-1.0,,1.0
+177,Eper,Earnings persistence,Earnings persistence,ni_ar1,,,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,1.0,0.0,2.0
+178,Eprd,Earnings predictability,Earnings volatility,ni_ivol,,,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,1.0,0.0,2.0
+179,Esm,Earnings smoothness,Earnings variability,earnings_variability,,1.0,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,-1.0,0.0,2.0
+180,Evr,Value relevance of earnings,Value relevance of earnings,,3,,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,1.0,,2.0
+181,Etl,Earnings timeliness,Earnings timeliness,,3,,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,1.0,,2.0
+182,Ecs,Earnings conservatism,Earnings conservatism,,3,,Francis et al. (2004),1.0,INTANGIBLES,1975 - 2001,,,1.0,,2.0
+183,Frm,Pension funding rate scaled by market equity,Pension funding rate scaled by market equity,,G,,Franzoni and Marin (2006) 1981/7,1.0,INTANGIBLES,1981 - 2003,2.1,,1.0,,1.0
+184,Fra,Pension funding rate scaled by book assets,Pension funding rate scaled by book assets,,G,,Franzoni and Marin (2006) 1981/7,1.0,INTANGIBLES,,,,,,
+185,Ala,Liquidity of book assets,Liquidity of book assets,aliq_at,,,Ortiz-Molina and Phillips (2014),1.0,INTANGIBLES,1984 - 2006,,,-1.0,0.0,
+186,Alaq,Quarterly liquidity of book assets,Quarterly liquidity of book assets,,Q,,1976/1,3.0,INTANGIBLES,,,,-1.0,,
+187,Alm,Liquidity of market assets,Liquidity of market assets,aliq_mat,,,Ortiz-Molina and Phillips (2014),1.0,INTANGIBLES,1984 - 2006,,,-1.0,0.0,
+188,Almq,Quarterly liquidity of market assets,Quarterly liquidity of market assets,,Q,,1976/1,3.0,INTANGIBLES,,,,-1.0,,
+189,Dls,Disparity between long- and short-term earnings growth forecasts,Disparity between long- and short-term earnings growth forecasts,,A,,Da and Warachka (2011) 1982/1,3.0,INTANGIBLES,1983 - 2006,-2.72,,1.0,,2.0
+190,Dis,Dispersion of analystsâ€™ earnings forecasts,Dispersion of analystsâ€™ earnings forecasts,,A,,Diether Malloy and Scherbina (2002) 1976/2,3.0,INTANGIBLES,1980 - 2000,-2.31,,-1.0,,1.0
+191,dlg,Dispersion in analystsâ€™ long-term growth forecasts,Dispersion in analystsâ€™ long-term growth forecasts,,A,,Anderson Ghysels and Juergens (2005) 1982/1,3.0,INTANGIBLES,1991 - 1997,2.79,,1.0,,2.0
+192,R1a,"Year 1-lagged return, annual","Year 1-lagged return, annual",seas_1_1an,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,7.6,,1.0,1.0,0.0
+193,R1n,"Year 1-lagged return, nonannual","Year 1-lagged return, nonannual",seas_1_1na,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,4.2,,1.0,1.0,0.0
+194,"R[2, 5] a","Years 2â€“5 lagged returns, annual","Years 2-5 lagged returns, annual",seas_2_5an,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,5.35,,1.0,1.0,0.0
+195,"R[2, 5] n","Years 2â€“5 lagged returns, nonannual","Years 2-5 lagged returns, nonannual",seas_2_5na,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,-5.6,,-1.0,1.0,0.0
+196,"R[6, 10] a","Years 6â€“10 lagged returns, annual","Years 6-10 lagged returns, annual",seas_6_10an,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,6.15,,1.0,1.0,0.0
+197,"R[6, 10] n","Years 6â€“10 lagged returns, nonannual","Years 6-10 lagged returns, nonannual",seas_6_10na,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,-4.62,,-1.0,1.0,0.0
+198,"R[11, 15] a","Years 11â€“15 lagged returns, annual","Years 11-15 lagged returns, annual",seas_11_15an,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,6.43,,1.0,1.0,0.0
+199,"R[11, 15] n","Years 11â€“15 lagged returns, nonannual","Years 11-15 lagged returns, nonannual",seas_11_15na,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,-1.77,,-1.0,0.0,0.0
+200,"R[16, 20] a","Years 16â€“20 lagged returns, annual","Years 16-20 lagged returns, annual",seas_16_20an,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,4.58,,1.0,1.0,0.0
+201,"R[16, 20] n","Years 16â€“20 lagged returns, nonannual","Years 16-20 lagged returns, nonannual",seas_16_20na,,,Heston and Sadka (2008),1.0,INTANGIBLES,1965 - 2002,-3.35,,-1.0,1.0,0.0
+202,Me,Size (the market equity),Market Equity,market_equity,,,Banz (1981),1.0,TRADING FRICTIONS,1926 - 1975,-2.42,,-1.0,1.0,0.0
+203,Ivff,Idiosyncratic volatility from the Fama-French 3-factor model,Idiosyncratic volatility from the Fama-French 3-factor model,ivol_ff3_21d,,,Ang et al. (2006),3.0,TRADING FRICTIONS,1963 - 2000,-2.86,,-1.0,1.0,0.0
+204,Iv,Idiosyncratic volatility,Idiosyncratic volatility from the CAPM (252 days),ivol_capm_252d,,,Ali Hwang and Trombley (2003),1.0,TRADING FRICTIONS,1976 - 1997,-2.69,,-1.0,1.0,1.0
+205,Ivc,Idiosyncratic volatility from the CAPM,Idiosyncratic volatility from the CAPM (21 days),ivol_capm_21d,,,,3.0,TRADING FRICTIONS,1967 - 2016,,,-1.0,0.0,
+206,Ivq,Idiosyncratic volatility from the q-factor model,Idiosyncratic volatility from the q-factor model,ivol_hxz4_21d,,,,3.0,TRADING FRICTIONS,1967 - 2016,,,-1.0,0.0,
+207,Tv,Total volatility,Return volatility,rvol_21d,,,Ang et al. (2006),3.0,TRADING FRICTIONS,1963 - 2000,-2.86,,-1.0,1.0,0.0
+208,Sv,Systematic volatility,Systematic volatility,,O,,Ang et al. (2006) 1986/2,3.0,TRADING FRICTIONS,,,,-1.0,,0.0
+209,Î²,The market beta,Market Beta,beta_60m,,,Fama and MacBeth (1973),3.0,TRADING FRICTIONS,1935 - 1968,1.85,,-1.0,1.0,0.0
+210,Î²FP,The Frazzini-Pedersen beta,Frazzini-Pedersen market beta,betabab_1260d,,,Frazzini and Pedersen (2014),3.0,TRADING FRICTIONS,1926 - 2012,7.12,,-1.0,1.0,0.0
+211,Î²D,The Dimson beta,Dimson beta,beta_dimson_21d,,,Dimson (1979),3.0,TRADING FRICTIONS,1955 - 1974,,,-1.0,0.0,0.0
+212,Tur,Share turnover,Share turnover,turnover_126d,,,Datar Naik and Radcliffe (1998),3.0,TRADING FRICTIONS,1963 - 1991,-8.58,,-1.0,1.0,1.0
+213,Cvt,Coefficient of variation for share turnover,Coefficient of variation for share turnover,turnover_var_126d,,,Chordia Subrahmanyam and Anshuman (2001),3.0,TRADING FRICTIONS,1966 - 1995,-6.03,,-1.0,1.0,2.0
+214,Dtv,Dollar trading volume,Dollar trading volume,dolvol_126d,,,Brennan Chordia and Subrahmanyam (1998),3.0,TRADING FRICTIONS,1966 - 1995,2.86,,-1.0,1.0,2.0
+215,Cvd,Coefficient of variation for dollar trading volume,Coefficient of variation for dollar trading volume,dolvol_var_126d,,,Chordia Subrahmanyam and Anshuman (2001),3.0,TRADING FRICTIONS,1966 - 1995,-5.1,,-1.0,1.0,2.0
+216,Pps,Price per share,Price per share,prc,,,Miller and Scholes (1982),3.0,TRADING FRICTIONS,1940 - 1978,3,,-1.0,1.0,0.0
+217,Ami,Absolute return-to-volume,Amihud Measure,ami_126d,,,Amihud (2002),3.0,TRADING FRICTIONS,1964 - 1997,5.39,,1.0,1.0,1.0
+218,Lm1,Prior 1-month turnover-adjusted number of zero daily trading volume,Number of zero trades with turnover as tiebreaker (1 month),zero_trades_21d,,,Liu (2006),3.0,TRADING FRICTIONS,1963 - 2003,0.93,,1.0,0.0,0.0
+219,Lm6,Prior 6-month turnover-adjusted number of zero daily trading volume,Number of zero trades with turnover as tiebreaker (6 months),zero_trades_126d,,,Liu (2006),3.0,TRADING FRICTIONS,1963 - 2003,4.06,,1.0,1.0,0.0
+220,Lm12,Prior 12-month turnover-adjusted number of zero daily trading volume,Number of zero trades with turnover as tiebreaker (12 months),zero_trades_252d,,,Liu (2006),3.0,TRADING FRICTIONS,1963 - 2003,4.4,,1.0,1.0,0.0
+221,Mdr,Maximum daily return,Maximum daily return,rmax1_21d,,,Bali Cakici and Whitelaw (2011),3.0,TRADING FRICTIONS,1962 -2005,-6.16,,-1.0,1.0,1.0
+222,Ts,Total skewness,Total skewness,rskew_21d,,,Bali Engle and Murray (2016),3.0,TRADING FRICTIONS,1925-2012,-4.01,,-1.0,1.0,0.0
+223,Isc,Idiosyncratic skewness from the CAPM,Idiosyncratic skewness from the CAPM,iskew_capm_21d,,,,3.0,TRADING FRICTIONS,1967 - 2016,,,-1.0,0.0,
+224,Isff1,Idiosyncratic skewness from the Fama-French 3-factor model,Idiosyncratic skewness from the Fama-French 3-factor model,iskew_ff3_21d,,,Bali Engle and Murray (2016),3.0,TRADING FRICTIONS,1925-2012,-2.44,,-1.0,1.0,0.0
+225,lsq,Idiosyncratic skewness from the q-factor model,Idiosyncratic skewness from the q-factor model,iskew_hxz4_21d,,,,3.0,TRADING FRICTIONS,1967 - 2016,,,-1.0,0.0,
+226,Cs,Coskewness,Coskewness,coskew_21d,,,Harvey and Siddique (2000),3.0,TRADING FRICTIONS,1963 - 1993,,<5%,-1.0,1.0,1.0
+227,Tail,Tail risk,Tail risk,,3,,Kelly and Jiang (2014),3.0,TRADING FRICTIONS,1963 - 2010,2.12,,1.0,,0.0
+228,Î²ret,The Acharya-Pedersen liquidity beta (return-return),The Acharya-Pedersen liquidity beta (return-return),,3,,Acharya and Pedersen (2005),3.0,TRADING FRICTIONS,1964 - 1999,0.468,,1.0,,2.0
+229,Î²lcc,The Acharya-Pedersen liquidity beta (illiquidity-illiquidity),The Acharya-Pedersen liquidity beta (illiquidity-illiquidity),,3,,Acharya and Pedersen (2005),3.0,TRADING FRICTIONS,1964 - 1999,-0.28,,-1.0,,2.0
+230,Î²lrc,The Acharya-Pedersen liquidity beta (return-illiquidity),The Acharya-Pedersen liquidity beta (return-illiquidity),,3,,Acharya and Pedersen (2005),3.0,TRADING FRICTIONS,1964 - 1999,0.086,,1.0,,2.0
+231,Î²lcr,The Acharya-Pedersen liquidity beta (illiquidity-return),The Acharya-Pedersen liquidity beta (illiquidity-return),,3,,Acharya and Pedersen (2005),3.0,TRADING FRICTIONS,1964 - 1999,-1.13,,-1.0,,2.0
+232,Î²net,The Acharya-Pedersen net liquidity beta,The Acharya-Pedersen net liquidity beta,,3,,Acharya and Pedersen (2005),3.0,TRADING FRICTIONS,1964 - 1999,2.532,,1.0,,2.0
+233,Srev,Short-term reversal,Short-term reversal,ret_1_0,,,Jegadeesh (1990),1.0,TRADING FRICTIONS,1929 - 1982,-18.58,,-1.0,1.0,2.0
+234,Î²âˆ’,Downside beta,Downside beta,betadown_252d,,,Ang Chen and Xing (2006),3.0,TRADING FRICTIONS,1963 - 2001,5.25,,-1.0,1.0,2.0
+235,Shl,The high-low bid-ask spread,The high-low bid-ask spread,bidaskhl_21d,,,Corwin and Schultz (2012),3.0,TRADING FRICTIONS,1927 - 2006,12.78,,1.0,1.0,0.0
+236,Sba,The bid-ask spread,The bid-ask spread,,G,,Hou and Loh (2016) 1984/2â€“2015/1 missing 1986/2â€“1987/1,3.0,TRADING FRICTIONS,1963 - 2012,1.26,,1.0,,2.0
+237,Î²lev,The financial intermediary leverage beta,The financial intermediary leverage beta,,G,,Adrian Etula and Muir (2014) 1973/1,3.0,TRADING FRICTIONS,1973 - 2009,,,1.0,,0.0
+238,Î²PS,The Pastor-Stambaugh liquidity beta,The Pastor-Stambaugh liquidity beta,,3,,,3.0,TRADING FRICTIONS,,2.37,,1.0,,
+239,Pin,Probability of information-based trading,Probability of information-based trading,,G,,Easley Hvidkjaer and Oâ€™Hara (2002) 1984/1â€“2002/12,1.0,TRADING FRICTIONS,1984 - 1998,2.496,,1.0,,1.0
+240,,Past 3 month return,Price momentum t-3 to t-1,ret_3_1,,,Jegedeesh and Titman (1993),,NEW,1965 - 1989,,,1.0,1.0,
+241,,Past 9 month return,Price momentum t-9 to t-1,ret_9_1,,,Jegedeesh and Titman (1993),,NEW,1965 - 1989,,,1.0,1.0,
+242,,Past 12 to 7 month momentum,Price momentum t-12 to t-7,ret_12_7,,,Novy-Marx (2012),,NEW,1925 - 2010,,,1.0,1.0,
+243,,Market Correlation,Market correlation,corr_1260d,,,"Assness, Frazzini, Gormsen, Pedersen (2020)",,NEW,1925 - 2015,,,-1.0,1.0,
+244,,Highest 5 days of return,Highest 5 days of return,rmax5_21d,,,"Bali, Brown, Murray and Tang (2017)",,NEW,1993 - 2012,,,-1.0,1.0,
+245,,Highest 5 days of return scaled by volatility,Highest 5 days of return scaled by volatility,rmax5_rvol_21d,,,"Assness, Frazzini, Gormsen, Pedersen (2020)",,NEW,1925-2015,,,-1.0,1.0,
+246,,Annual Return on equity,Return on equity,ni_be,,,Haugen and Baker (1996),,NEW,1979 - 1993,,,1.0,1.0,
+247,,Operating cash flow to assets,Operating cash flow to assets,ocf_at,,,"Bouchard, Krüger, Landier and Thesmar (2019)",,NEW,1990 - 2015,,,1.0,1.0,
+248,,1 year change in operating cash flow to assets,Change in operating cash flow to assets,ocf_at_chg1,,,"Bouchard, Krüger, Landier and Thesmar (2019)",,NEW,1990 - 2015,,,1.0,1.0,
+249,,Mispricing factor: Performance,Mispricing factor: Performance,mispricing_perf,,,Stambaugh and Yuan (2016),,NEW,1967 - 2013,,,1.0,1.0,
+250,,Mispricing factor: Management,Mispricing factor: Management,mispricing_mgmt,,,Stambaugh and Yuan (2016),,NEW,1967 - 2013,,,1.0,1.0,
+251,,Quality minus Junk: Composite,Quality minus Junk: Composite,qmj,,,"Assness, Frazzini and Pedersen (2018)",,NEW,1957 - 2016,,,1.0,1.0,
+252,,Quality minus Junk: Profitability,Quality minus Junk: Profitability,qmj_prof,,,"Assness, Frazzini and Pedersen (2018)",,NEW,1957 - 2016,,,1.0,1.0,
+253,,Quality minus Junk: Growth,Quality minus Junk: Growth,qmj_growth,,,"Assness, Frazzini and Pedersen (2018)",,NEW,1957 - 2016,,,1.0,1.0,
+254,,Quality minus Junk: Safety,Quality minus Junk: Safety,qmj_safety,,,"Assness, Frazzini and Pedersen (2018)",,NEW,1957 - 2016,,,1.0,1.0,
