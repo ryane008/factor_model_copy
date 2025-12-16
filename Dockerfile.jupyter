@@ -1,0 +1,41 @@
+FROM jupyter/scipy-notebook:python-3.11
+
+# Switch to root so we can install system packages
+USER root
+
+# Install system libs for Postgres (psycopg2)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc \
+ && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the default notebook user
+USER ${NB_UID}
+
+# Python packages for DB + WRDS and analysis
+RUN pip install --no-cache-dir \
+    psycopg2-binary \
+    SQLAlchemy \
+    pandas \
+    wrds \
+    influxdb-client \
+    influxdb3-python \
+    statsmodels \
+    plotly \
+    seaborn \
+    matplotlib \
+    ipywidgets \
+    pyarrow \
+    fastparquet \
+    tables
+
+# Set workdir and basic dirs
+RUN mkdir -p /home/jovyan/work/notebooks \
+    /home/jovyan/work/shared-data \
+    /home/jovyan/work/ryan \
+    /home/jovyan/work/alan
+
+WORKDIR /home/jovyan/work
+
+EXPOSE 8888
+
+CMD ["start-notebook.sh", "--NotebookApp.token=qtab_jupyter_2024", "--NotebookApp.password=''"]

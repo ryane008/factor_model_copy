@@ -1,0 +1,46 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    container_name: factor_timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PGUSER:-postgres}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
+      POSTGRES_DB: ${PGDATABASE:-factor_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    networks:
+      - factor_network
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyter
+    container_name: factor_jupyter
+    restart: unless-stopped
+    depends_on:
+      - timescaledb
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env          # <- brings in PG*, WRDS_*, JUPYTER_TOKEN, etc.
+    environment:
+      # Only overrides / extras go here
+      - PGHOST=timescaledb   # inside container, talk to the DB service name
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks
+      - ./ryan:/home/jovyan/work/ryan
+      - ./alan:/home/jovyan/work/alan
+      - ./shared-data:/home/jovyan/work/shared-data
+      - ./src:/home/jovyan/work/src
+    networks:
+      - factor_network
+
+volumes:
+  timescaledb_data:
+
+networks:
+  factor_network:
+    driver: bridge

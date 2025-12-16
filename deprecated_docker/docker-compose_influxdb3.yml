@@ -1,0 +1,90 @@
+
+services:
+  # 🔧 One-shot init to ensure the plugin Python venv exists
+  influxdb-init:
+    image: python:3.12-slim
+    container_name: factor_influxdb_init
+    command: >
+      bash -c "
+        set -e
+        mkdir -p /var/lib/influxdb3/plugins &&
+        if [ ! -d /var/lib/influxdb3/plugins/.venv ]; then
+          echo '🔧 Creating InfluxDB plugin venv...'
+          python -m venv /var/lib/influxdb3/plugins/.venv &&
+          echo '✅ InfluxDB plugin venv created.'
+        else
+          echo '✅ InfluxDB plugin venv already exists, skipping.'
+        fi
+      "
+    volumes:
+      - influxdb3_plugins:/var/lib/influxdb3/plugins
+    restart: "no"
+    networks:
+      - factor_network
+
+  influxdb:
+    image: influxdb:3-enterprise
+    container_name: factor_influxdb
+    restart: unless-stopped
+    depends_on:
+      - influxdb-init         # ensure venv exists before serve
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb3_data:/var/lib/influxdb3
+      - influxdb3_plugins:/var/lib/influxdb3/plugins
+    command: >
+      influxdb3 serve
+      --cluster-id=cluster0
+      --node-id=node0
+      --license-type=home
+      --license-email=${INFLUXDB_AT_HOME_EMAIL}
+      --http-bind=0.0.0.0:8086
+      --object-store=file
+      --data-dir=/var/lib/influxdb3
+      --plugin-dir=/var/lib/influxdb3/plugins
+    networks:
+      - factor_network
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyter
+    container_name: factor_jupyter
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env
+    environment:
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-qtab_jupyter_2024}
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_DATABASE=${INFLUXDB_BUCKET:-jkp_factors}
+      - INFLUXDB_ORG=qtab
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks
+      - ./ryan:/home/jovyan/work/ryan
+      - ./alan:/home/jovyan/work/alan
+      - ./shared-data:/home/jovyan/work/shared-data
+      - ./src:/home/jovyan/work/src
+    networks:
+      - factor_network
+    extra_hosts:
+      - "influxdb:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  influxdb3_data:
+  influxdb3_plugins:
+
+networks:
+  factor_network:
+    driver: bridge

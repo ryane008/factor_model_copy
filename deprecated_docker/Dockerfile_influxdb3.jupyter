@@ -1,0 +1,39 @@
+FROM jupyter/scipy-notebook:latest
+
+USER root
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+USER jovyan
+
+# Install Python packages for factor modeling
+RUN pip install --no-cache-dir \
+    wrds \
+    influxdb-client \
+    influxdb3-python \
+    statsmodels \
+    plotly \
+    seaborn \
+    matplotlib \
+    ipywidgets \
+    pyarrow \
+    fastparquet \
+    tables
+
+# Create working directories
+RUN mkdir -p /home/jovyan/work/notebooks \
+    /home/jovyan/work/shared-data \
+    /home/jovyan/work/ryan \
+    /home/jovyan/work/alan
+
+WORKDIR /home/jovyan/work
+
+EXPOSE 8888
+
+CMD ["start-notebook.sh", "--NotebookApp.token=qtab_jupyter_2024", "--NotebookApp.password=''"]
