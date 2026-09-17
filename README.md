@@ -25,63 +25,86 @@ code .env
 
 ### Step 2: Configure Your WRDS Credentials
 
-Edit the `.env` file and replace the placeholder values:
+Edit the `.env` file and replace the placeholder values. The full annotated
+version lives in `.env.template`; the values that matter are:
 
 ```bash
-# =============================================================================
-# REQUIRED: Your WRDS Credentials
-# =============================================================================
+# REQUIRED — your WRDS credentials
 WRDS_USERNAME=your_actual_wrds_username
 WRDS_PASSWORD=your_actual_wrds_password
 
-# =============================================================================
-# OPTIONAL: InfluxDB Settings (uses defaults if not changed)
-# =============================================================================
-INFLUXDB_HOST=influxdb
-INFLUXDB_PORT=8086
-INFLUXDB_TOKEN=qtab_factor_token_2024_secure
-INFLUXDB_ORG=qtab
-INFLUXDB_BUCKET=jkp_factors
+# TimescaleDB / Postgres — these both seed the database container on first boot
+# and are what the notebooks connect with, so the two sides stay in sync
+PGUSER=postgres
+PGPASSWORD=postgres
+PGDATABASE=factor_db
+PGPORT=5432
 
-# InfluxDB Admin Credentials (for web UI)
-INFLUXDB_ADMIN_USER=admin
-INFLUXDB_ADMIN_PASSWORD=factormodel2024
-
-# =============================================================================
-# OPTIONAL: Jupyter Settings
-# =============================================================================
+# Jupyter
 JUPYTER_TOKEN=qtab_jupyter_2024
 JUPYTER_PORT=8888
 ```
+
+The storage layer is **TimescaleDB/Postgres**. The InfluxDB variables that used
+to live here are obsolete — that stack is in `deprecated_docker/`.
+
+#### Why there is no `PGHOST`
+
+The database hostname differs depending on where the code runs, and it resolves
+with no branching and no entry in `.env`:
+
+- **Inside the jupyter container**, `docker-compose.yml` sets
+  `PGHOST=timescaledb` under `environment:`, which takes precedence over
+  `env_file:`.
+- **Outside the container** (local venv, host Jupyter, a plain script), `PGHOST`
+  is unset and the code defaults to `localhost`, where compose publishes 5432.
+
+So `os.getenv("PGHOST", "localhost")` covers every case on every OS. Setting
+`PGHOST` in `.env` would work today only because compose happens to override it
+— leave it out. Set it explicitly only if your database is somewhere other than
+this compose stack.
+
+This replaces the old `is_docker_environment()` helper, which sniffed
+`JUPYTER_SERVER_ROOT`. A *local* Jupyter also sets that variable, so running a
+notebook on the host under Jupyter would resolve `PGHOST` to `timescaledb` and
+fail to connect.
 
 ### Step 3: Security Verification
 
 ✅ **Verify the .env file is ignored by git:**
 
 ```bash
-# This should show .env is ignored
-git status
-
-# .env should NOT appear in untracked files
-# If it does, check your .gitignore file
+git status          # .env must NOT appear in untracked files
 ```
 
 ⚠️ **CRITICAL SECURITY REMINDERS:**
 
 - Never commit `.env` files to version control
-- Never share your `.env` file with others
 - Each team member creates their own `.env` file
-- Keep your WRDS credentials secure
+- **Never print a credential to a notebook cell.** `.gitignore` protects `.env`,
+  but it cannot protect notebook *output* — a debug `print` of
+  `WRDS_PASSWORD` in `ryan/charactersitics_loader.ipynb` was committed in
+  `2d4b502`, which is how the current WRDS password leaked. Clear notebook
+  outputs before committing, and rotate any credential that has ever been
+  printed.
 
 ### Step 4: Test Your Configuration
 
 ```bash
 # Start the Docker environment
-docker-compose up -d
+docker compose up -d
 
-# Check that containers can read environment variables
-docker-compose exec jupyter env | grep WRDS
-docker-compose exec jupyter env | grep INFLUXDB
+# Check that the container can read the environment
+docker compose exec jupyter env | grep WRDS_USERNAME
+docker compose exec jupyter env | grep PGHOST     # should print timescaledb
+
+# Confirm the database is reachable from the container
+docker compose exec jupyter python -c "
+import os, sqlalchemy as sa
+e = sa.create_engine(f\"postgresql+psycopg2://{os.environ['PGUSER']}:{os.environ['PGPASSWORD']}\"
+                     f\"@{os.getenv('PGHOST','localhost')}:{os.getenv('PGPORT','5432')}/{os.environ['PGDATABASE']}\")
+print(e.connect().execute(sa.text('SELECT version()')).scalar())
+"
 ```
 
 ## �🚀 Quick Start (Updated for .env)
@@ -206,13 +229,42 @@ factor-modeling/
 ├── 📁 Data Directories
 │   ├── shared-data/                # Shared CSV files (Docker mount)
 │   ├── ryan/                       # Ryan's notebooks
+│   │   └── sample/                 # ⭐ Barra prototype on a 220-name sample
 │   └── alan/                       # Alan's notebooks
 │
 └── 📚 Documentation
+    ├── .env.template               # Annotated environment config
     ├── Docker_Setup_README.md      # Detailed Docker setup
-    ├── InfluxDB_Query_Guide.md     # Query examples and patterns
+    ├── InfluxDB_Query_Guide.md     # Obsolete — InfluxDB stack is deprecated
     └── JKP_Characteristics_README.md # Factor definitions
 ```
+
+## ⭐ Barra risk model prototype — `ryan/sample/`
+
+The active line of work. Builds the inputs for a USE4-style risk model on a
+stratified sample of **20 securities per GICS sector × 11 sectors = 220**, drawn
+from the securities alive at 2005-12-31 and followed forward.
+
+```bash
+docker compose up -d
+# → http://localhost:8888 → ryan/sample/run_pipeline.ipynb, run top to bottom
+
+python ryan/sample/test_logic.py     # 40 offline checks, no WRDS or database needed
+```
+
+Writes three tables, all prefixed `ryan_sample_` so they never collide with the
+full-universe tables: `ryan_sample_universe` (the roster and the seed that
+produced it), `ryan_sample_panel` (monthly characteristics keyed on `(id, eom)`),
+and `ryan_sample_exposures` (standardized style factors and industry dummies).
+
+**Why a sample:** the factor covariance matrix `F` needs `T >> K` monthly
+cross-sections, not large `N`. The full-universe pull returned three months with
+returns in only one of them, making `F` rank-1. A small universe with long
+history is the correct trade.
+
+See [`ryan/sample/README.md`](ryan/sample/README.md) for the design, the defects
+it fixes in the full-universe pipeline, and the limitations it deliberately
+accepts.
 
 ## 🎯 Factor Models Included
 
@@ -275,29 +327,30 @@ usa_data = data_loader.load_characteristics_data(
 
 ### Environment Detection
 
-The system automatically detects your environment:
+One env lookup, no heuristics:
 
-- **🐳 Docker Environment**: Uses container networking (`influxdb:8086`)
-- **💻 Local Environment**: Uses localhost networking (`localhost:8086`)
-- **🔐 WRDS Credentials**: Loads from `.env` file, falls back to interactive input
+- **🐳 Inside the container**: `docker-compose.yml` sets `PGHOST=timescaledb`
+- **💻 On the host**: `PGHOST` is unset, so the code defaults to `localhost:5432`
+- **🔐 WRDS credentials**: read from `.env`; missing values raise with
+  instructions rather than prompting
 
-### Credential Priority
-
-1. **Environment Variables** (from `.env` file) - **Recommended**
-2. **Interactive Input** - Fallback if `.env` not configured
-3. **No Credentials** - Error with helpful instructions
+There is deliberately **no interactive credential fallback**. A prompt makes a
+notebook non-reproducible and encourages pasting secrets into cells, which is
+how the current WRDS password ended up in git history.
 
 ### Example .env Configuration
 
 ```bash
-# Minimum required for data loading
+# Required
 WRDS_USERNAME=your_username
 WRDS_PASSWORD=your_password
 
-# Optional customizations
-INFLUXDB_BATCH_SIZE=5000
-LOG_LEVEL=INFO
-ENVIRONMENT=development
+# Database — seeds the container and is what notebooks connect with
+PGUSER=postgres
+PGPASSWORD=postgres
+PGDATABASE=factor_db
+PGPORT=5432
+# PGHOST intentionally omitted — see "Why there is no PGHOST" above
 ```
 
 ## 📈 Usage Examples
