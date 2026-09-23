@@ -262,6 +262,71 @@ def solve_cross_section(
     }
 
 
+def build_regression_panel(
+    exposures: pd.DataFrame,
+    style_cols: list[str],
+    dummy_cols: list[str],
+    by: str = "eom",
+    return_col: str | None = None,
+    cap_col: str | None = None,
+    lag_exposures: bool | None = None,
+    winsor_return_sigma: float | None = -1.0,
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """
+    The exact frame the regression is run on: one row per (asset, return month).
+
+    This is the only place the two input transforms happen, and it is worth
+    having as a named artifact rather than an intermediate hidden inside
+    ``run_panel``.
+
+    ``ryan_sample_exposures`` is keyed (id, eom) and means "the exposures
+    observed at eom" -- a true, self-consistent statement, which is why the lag
+    is NOT applied there. But it makes that table a trap for anything that reads
+    it: regressing its ``ret_exc`` on its own ``f_*`` columns is the
+    contemporaneous fit, and it reports a value factor return of -18.1%/yr at
+    t = -4.7 without a single diagnostic complaining.
+
+    The frame returned here closes that hole by carrying **both** dates in every
+    row -- ``exposure_eom`` (when the right-hand side was measured) and ``eom``
+    (the month whose return is on the left) -- so the alignment is legible in the
+    data instead of implicit in code. ``ret_exc_raw`` keeps the untrimmed return
+    alongside the winsorized one so the trim is auditable too.
+    """
+    ret = return_col or config.RETURN_COL
+    do_lag = config.LAG_EXPOSURES if lag_exposures is None else lag_exposures
+    sigma = config.WINSOR_RETURN_SIGMA if winsor_return_sigma == -1.0 else winsor_return_sigma
+
+    if do_lag:
+        n_before = len(exposures)
+        exposures = align_returns_to_lagged_exposures(
+            exposures, style_cols, dummy_cols, by=by, return_col=ret, cap_col=cap_col
+        )
+        if verbose:
+            print(f"⏮  exposures lagged one month: {n_before:,} → {len(exposures):,} rows "
+                  f"(each security's first month has no prior exposure)")
+    else:
+        exposures = exposures.copy()
+        # Stamped anyway, so the column means the same thing in both modes and a
+        # stored panel always says what it was built from.
+        exposures["exposure_eom"] = exposures[by]
+        if verbose:
+            print("⚠️  LAG_EXPOSURES is off — regressing month-t returns on exposures "
+                  "measured at the END of month t. The value factor return this produces "
+                  "is look-ahead, not a premium.")
+
+    exposures["ret_exc_raw"] = pd.to_numeric(exposures[ret], errors="coerce")
+    if sigma is not None:
+        trimmed, n_clipped = winsorize_returns(exposures["ret_exc_raw"], exposures[by], sigma)
+        exposures[ret] = trimmed
+        if verbose:
+            print(f"✂️  dependent variable winsorized at {sigma} robust sigma: "
+                  f"{n_clipped:,} of {len(exposures):,} observations clipped "
+                  f"({n_clipped / len(exposures):.3%})")
+
+    return exposures
+
+
 def prepare_cross_section(
     frame: pd.DataFrame,
     style_cols: list[str],
@@ -343,11 +408,11 @@ def run_panel(
     lag_exposures: bool | None = None,
     winsor_return_sigma: float | None = -1.0,
     verbose: bool = True,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Fit every cross-section and stack the results.
 
-    Returns ``(factor_returns, specific_returns, diagnostics)``:
+    Returns ``(factor_returns, specific_returns, diagnostics, regression_panel)``:
 
     - ``factor_returns``  wide, indexed by date, one column per factor. Wide
       rather than long because every downstream consumer (the covariance in 03,
@@ -355,37 +420,22 @@ def run_panel(
       database is produced at write time.
     - ``specific_returns`` long, (id, eom) -- the grain Delta is estimated on.
     - ``diagnostics``     one row per cross-section.
+    - ``regression_panel`` exactly the rows that were fitted, with the exposure
+      date and the return date both present. Returned rather than rebuilt by the
+      caller so that what gets stored is, by construction, what was regressed --
+      a caller that re-derived it could drift from this function's parameters and
+      no test would catch it.
 
     ``winsor_return_sigma`` defaults to the sentinel -1.0 meaning "use
     config.WINSOR_RETURN_SIGMA"; pass ``None`` to explicitly disable trimming,
     which None alone could not express.
     """
     ret = return_col or config.RETURN_COL
-    do_lag = config.LAG_EXPOSURES if lag_exposures is None else lag_exposures
-    sigma = config.WINSOR_RETURN_SIGMA if winsor_return_sigma == -1.0 else winsor_return_sigma
-
-    if do_lag:
-        n_before = len(exposures)
-        exposures = align_returns_to_lagged_exposures(
-            exposures, style_cols, dummy_cols, by=by, return_col=ret, cap_col=cap_col
-        )
-        if verbose:
-            print(f"⏮  exposures lagged one month: {n_before:,} → {len(exposures):,} rows "
-                  f"(each security's first month has no prior exposure)")
-    elif verbose:
-        print("⚠️  LAG_EXPOSURES is off — regressing month-t returns on exposures "
-              "measured at the END of month t. The value factor return this produces "
-              "is look-ahead, not a premium.")
-
-    if sigma is not None:
-        trimmed, n_clipped = winsorize_returns(
-            pd.to_numeric(exposures[ret], errors="coerce"), exposures[by], sigma
-        )
-        exposures = exposures.assign(**{ret: trimmed})
-        if verbose:
-            print(f"✂️  dependent variable winsorized at {sigma} robust sigma: "
-                  f"{n_clipped:,} of {len(exposures):,} observations clipped "
-                  f"({n_clipped / len(exposures):.3%})")
+    exposures = build_regression_panel(
+        exposures, style_cols, dummy_cols, by=by, return_col=ret, cap_col=cap_col,
+        lag_exposures=lag_exposures, winsor_return_sigma=winsor_return_sigma,
+        verbose=verbose,
+    )
 
     all_names = [MARKET_FACTOR] + dummy_cols + [c[2:] if c.startswith("f_") else c for c in style_cols]
 
@@ -448,7 +498,12 @@ def run_panel(
               f"median assets = {diagnostics['n_assets'].median():.0f}, "
               f"median residual df = {diagnostics['resid_df'].median():.0f}")
 
-    return factor_returns, specific, diagnostics
+    # Only the months that were actually fitted. A month skipped for too-few
+    # assets contributes no f(t) and no u(i,t), so storing its rows would put
+    # observations in the regression panel that no regression ever saw.
+    panel = exposures[exposures[by].isin(factor_returns.index)].reset_index(drop=True)
+
+    return factor_returns, specific, diagnostics, panel
 
 
 def to_long(factor_returns: pd.DataFrame, by: str = "eom") -> pd.DataFrame:

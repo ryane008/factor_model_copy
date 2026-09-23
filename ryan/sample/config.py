@@ -45,10 +45,37 @@ RANDOM_SEED = 20260912
 RETURN_COL = "ret_exc"
 
 # Style descriptors, grouped by the factor they feed. Grouping matters because
-# be_me / ni_me / ocf_me are highly collinear -- USE4 combines descriptors into
-# one factor rather than letting each compete in the regression.
+# collinear descriptors entered separately make the individual factor returns
+# unstable -- USE4 combines descriptors into one factor rather than letting each
+# compete in the regression.
+#
+# Value is book-to-price ALONE, which is USE4's definition. It previously blended
+# be_me with ni_me and ocf_me, and that blend did not mean what its name said.
+# The two earnings yields share a market-equity denominator with be_me, but their
+# NUMERATORS carry far more cross-sectional dispersion -- losers are firms with
+# collapsing or negative earnings -- so the numerator channel swamps the price
+# channel and they behave as profitability proxies. Measured against momentum
+# exposure: be_me -0.33, ocf_me -0.01, ni_me +0.14. Blended, Value came out at
+# -0.09 against momentum and +0.19 against profitability, the latter being
+# backwards for a value factor.
+#
+# On be_me alone: -0.333 against momentum, -0.326 against profitability. Cheap
+# stocks are the ones that fell and the ones with weak businesses; both signs
+# are right, and the momentum figure is stable across five-year eras
+# (-0.37, -0.33, -0.33, -0.30, -0.29).
+#
+# Nothing measurable in Sigma turns on this. Design condition number 8.58 vs
+# 8.60, median R^2 0.274 either way, condition number of F 44.7 vs 43.6. It is
+# an interpretability choice, not a numerical one.
+#
+# Splitting the earnings yields into their own USE4-style "Earnings Yield"
+# factor was tested and is worse HERE: it lands +0.408 against profitability on
+# exposures and -0.420 on factor returns -- the most collinear pair in the model
+# -- and splits the premium so neither factor is significant (t = 1.35, 1.40).
+# USE4 can afford that nineteenth factor on ~3,000 names; at N ~ 170 it spends a
+# degree of freedom this sample cannot resolve. Revisit if the universe grows.
 STYLE_DESCRIPTORS = {
-    "value": ["be_me", "ni_me", "ocf_me"],
+    "value": ["be_me"],
     "size": ["market_equity"],
     "momentum": ["ret_12_1"],
     "profitability": ["gp_at", "ni_at"],
@@ -166,6 +193,13 @@ TBL_EXPOSURES = "ryan_sample_exposures"  # standardized exposures + industry dum
 # Step 4 outputs. Two tables rather than one because they are at different
 # grains -- f(t) is per (eom, factor), u(i,t) is per (id, eom) -- but they come
 # out of a single regression and are always written together.
+# The exact rows the regression was run on, carrying BOTH dates: exposure_eom
+# (right-hand side) and eom (the month whose return is on the left). Stored so
+# the lag is visible in the data rather than implicit in code -- reading
+# TBL_EXPOSURES and regressing its ret_exc on its own f_* columns is the
+# contemporaneous fit, and nothing in the output warns you.
+TBL_REGRESSION_PANEL = "ryan_sample_regression_panel"  # (id, eom) + exposure_eom
+
 TBL_FACTOR_RETURNS = "ryan_sample_factor_returns"  # f(t), long: (eom, factor)
 TBL_SPECIFIC_RETURNS = "ryan_sample_specific_returns"  # u(i,t), (id, eom)
 TBL_REGRESSION_DIAG = "ryan_sample_regression_diag"  # per-cross-section fit quality

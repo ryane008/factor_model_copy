@@ -383,6 +383,48 @@ print(f"   ℹ️  groupby.shift(1) would give security B's 2012-06 return an ex
 check("market cap comes from the exposure month, not the return month",
       a_rows["market_equity"].tolist() == [100.0, 110.0, 120.0])
 
+print("\n=== stored regression panel ===")
+
+# The panel that gets written must BE the thing that was regressed, not a
+# re-derivation of it — that is the whole point of returning it from run_panel
+# rather than rebuilding it in the notebook.
+rp_n, rp_m = 40, 8
+rp = pd.concat([
+    pd.DataFrame({
+        "id": [f"s{i}" for i in range(rp_n)],
+        "eom": eom,
+        "ret_exc": rng.normal(0, .06, rp_n),
+        "market_equity": np.exp(rng.normal(7, 1.2, rp_n)),
+        "f_value": rng.normal(0, 1, rp_n),
+        "f_size": rng.normal(0, 1, rp_n),
+    })
+    for eom in pd.date_range("2006-01-31", periods=rp_m, freq="ME")
+], ignore_index=True)
+rp["sector_code"] = np.tile(np.repeat(["10", "20"], rp_n // 2), rp_m)
+rp, rp_dummies = standardize.build_industry_dummies(rp)
+
+Fp, Up, Dp, panel = factor_returns.run_panel(
+    rp, ["f_value", "f_size"], rp_dummies, verbose=False)
+
+check("run_panel returns the regression panel as a 4th value", isinstance(panel, pd.DataFrame))
+check("panel carries both dates",
+      {"eom", "exposure_eom"} <= set(panel.columns))
+gap = (panel["eom"].dt.to_period("M") - panel["exposure_eom"].dt.to_period("M")).apply(lambda x: x.n)
+check("exposure_eom is exactly one month before eom, every row", (gap == 1).all(),
+      f"gaps seen: {sorted(gap.unique())}")
+check("panel holds only months that were actually fitted",
+      set(panel["eom"]) == set(Fp.index),
+      "a skipped month must not leave rows behind")
+check("panel row count matches the rows the fit consumed", len(panel) == len(Up))
+check("raw return retained alongside the winsorized one", "ret_exc_raw" in panel.columns)
+
+# And the trap it exists to prevent: the UNLAGGED frame must be a different join.
+panel_nolag = factor_returns.build_regression_panel(
+    rp, ["f_value", "f_size"], rp_dummies, lag_exposures=False, verbose=False)
+check("with the lag off, exposure_eom equals eom (and is still stamped)",
+      (panel_nolag["exposure_eom"] == panel_nolag["eom"]).all(),
+      "so a stored panel always says which alignment built it")
+
 print("\n=== dependent-variable winsorization ===")
 wr = pd.Series([0.01, -0.02, 0.03, -0.01, 0.02, 22.0, -0.03, 0.015, -0.025, 0.005])
 wg = pd.Series(["m"] * 10)
