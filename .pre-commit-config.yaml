@@ -1,0 +1,21 @@
+# Pre-commit hooks. One-time setup per clone:
+#   brew install gitleaks pre-commit && pre-commit install
+#
+# gitleaks runs as a LOCAL hook against the installed binary, so it needs no
+# network access and uses this repo's .gitleaks.toml (default rules plus the
+# rule that catches the kind of leak this repo actually had). It goes through
+# scripts/gitleaks_staged.sh, which scans raw staged bytes and fails CLOSED --
+# bare gitleaks passes silently when `git diff` errors.
+#
+# Notebook outputs are stripped by the nbstripout git FILTER (.gitattributes),
+# not by a hook: a hook would rewrite your working copy and delete the outputs
+# you are looking at, while the filter only strips what gets committed.
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (secrets in staged changes)
+        entry: scripts/gitleaks_staged.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
