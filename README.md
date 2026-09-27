@@ -79,14 +79,36 @@ git status          # .env must NOT appear in untracked files
 
 ⚠️ **CRITICAL SECURITY REMINDERS:**
 
-- Never commit `.env` files to version control
+- Never commit `.env` files, or any `.env.*` variant, to version control. Only
+  `.env.template` is committed. `deprecated_docker/.env.old` was committed with
+  live credentials and has since been untracked.
 - Each team member creates their own `.env` file
 - **Never print a credential to a notebook cell.** `.gitignore` protects `.env`,
-  but it cannot protect notebook *output* — a debug `print` of
-  `WRDS_PASSWORD` in `ryan/charactersitics_loader.ipynb` was committed in
-  `2d4b502`, which is how the current WRDS password leaked. Clear notebook
-  outputs before committing, and rotate any credential that has ever been
-  printed.
+  but it cannot protect notebook *output*. A debug `print` of `WRDS_PASSWORD` in
+  `ryan/charactersitics_loader.ipynb` was committed (first in `12cb23e`), which is
+  how the WRDS password leaked. Rotate any credential that has ever been printed
+  or committed; removing it from the current files does not remove it from git
+  history.
+
+### Step 3b: One-time commit guardrails (every clone)
+
+```bash
+brew install gitleaks pre-commit pipx
+pipx install nbstripout            # add `--backend pip` if pipx's uv backend errors
+nbstripout --install               # strip notebook outputs from what you commit
+pre-commit install                 # scan every commit for secrets
+```
+
+- **nbstripout** is a git *filter*. Commits never contain notebook outputs, but
+  your local notebooks keep theirs. `.gitattributes` turns it on for `*.ipynb`;
+  it has no effect in a clone until `nbstripout --install` has been run there.
+- **gitleaks** runs on staged changes through `scripts/gitleaks_staged.sh`, using
+  `.gitleaks.toml`. That adds a rule for password literals, because the default
+  rules missed this repo's actual leak. The wrapper fails closed: bare gitleaks
+  reports "no leaks" and passes when `git diff` errors.
+- Auditing history? Neutralise the notebook textconv, or gitleaks can't see
+  outputs in old commits:
+  `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=diff.ipynb.textconv GIT_CONFIG_VALUE_0=cat gitleaks git --redact --config .gitleaks.toml .`
 
 ### Step 4: Test Your Configuration
 

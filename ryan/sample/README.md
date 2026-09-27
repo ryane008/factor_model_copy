@@ -4,6 +4,9 @@ Builds the inputs for a USE4-style risk model on a deliberately small universe:
 **20 securities per GICS sector × 11 sectors = 220**, drawn once from the
 securities alive at **2005-12-31** and followed forward.
 
+> **Full universe / Russell 1000:** `ryan/universe/` builds the same model on a
+> real universe, reusing every module here. See its README.
+
 ## Quick start
 
 ```bash
@@ -19,7 +22,7 @@ container or against the published port from the host.
 The pure logic has no WRDS or database dependency, so it can be checked anywhere:
 
 ```bash
-python ryan/sample/test_logic.py      # 40 checks, no network
+python ryan/sample/test_logic.py      # 137 checks, no network
 ```
 
 ## Re-running it
@@ -87,7 +90,24 @@ you can see it staying healthy.
 | `sampling.py` | The stratified draw and the date-aware identifier joins. |
 | `standardize.py` | Robust winsorization, cap-weighted standardization, descriptor combination, industry dummies. |
 | `gics.py` | GICS code → name tables, hardcoded. |
-| `test_logic.py` | 40 offline checks over the pure logic. |
+| `02_factor_returns.ipynb` | Step 4: constrained WLS → factor returns f(t), specific returns u(i,t). |
+| `03_factor_covariance.ipynb` | Step 5: rolling F(t) — decay, eigenfactor adjustment, VRA — with each component scored out of sample. |
+| `04_specific_risk.ipynb` | Step 6: rolling Δ(t) — decay, Bayesian size-decile shrinkage, specific VRA. |
+| `05_risk_model.ipynb` | Step 7: Σ = XFXᵀ + Δ assembled lazily; out-of-sample bias tests at factor, asset and portfolio level. |
+| `06_portfolio_risk.ipynb` | Risk of a portfolio CSV: vol, beta, tracking error, factor/asset attribution, forecast-vs-realized history. |
+| `07_mean_variance.ipynb` | Mean-variance / min-variance optimization of a portfolio CSV, frontier, trades, walk-forward check. |
+| `08_asset_query.ipynb` | One stock: exposures, risk decomposition, most/least covarying names, history; dropdown + `pair(a, b)`. |
+| `factor_returns.py` | Step 4 logic: exposure lag, return winsorization, constrained WLS. |
+| `riskmath.py` | Shared estimator math: exponential weights, Newey-West (Bartlett), eigenfactor adjustment, VRA, bias stats. |
+| `factor_cov.py` | Rolling F(t) driver; every stage kept; long-format I/O. |
+| `specific_risk.py` | Rolling Δ(t) driver and USE4 Bayesian shrinkage. |
+| `riskmodel.py` | `ModelStore` / `RiskModel`: Σ in factor space, decomposition, cov rows, ticker resolution. |
+| `biastest.py` | Out-of-sample bias statistics shared by 03 and 05. |
+| `portfolio.py` | Portfolio CSV loading/resolution; illustrative default α. |
+| `optimizer.py` | SLSQP mean-variance in factor space; Woodbury closed-form min-variance. |
+| `query.py` | Single-asset report and pairwise covariance breakdown used by 08. |
+| `portfolios/` | Portfolio CSVs. `example_portfolio.csv` is the default input; 07 writes optimized weights next to it. |
+| `test_logic.py` | 137 offline checks over the pure logic. |
 
 ## Output tables
 
@@ -100,6 +120,14 @@ index, so a double run fails loudly instead of silently doubling the panel.
 | `ryan_sample_universe` | one row per `id` | The roster, plus the seed and rules that produced it |
 | `ryan_sample_panel` | `(id, eom)` | Raw monthly characteristics, returns, resolved identifiers, sector |
 | `ryan_sample_exposures` | `(id, eom)` | Standardized style factors `f_*` and industry dummies `ind_*` |
+| `ryan_sample_regression_panel` | `(id, eom)` | The rows actually regressed, carrying both `exposure_eom` and `eom` |
+| `ryan_sample_factor_returns` | `(eom, factor)` | f(t) |
+| `ryan_sample_specific_returns` | `(id, eom)` | u(i,t) |
+| `ryan_sample_regression_diag` | `eom` | Per-month fit quality |
+| `ryan_sample_factor_covariance` | `(forecast_date, factor_i, factor_j)` | F(t): `cov` (final) plus `cov_raw`, `cov_nw`, `cov_eigen` |
+| `ryan_sample_factor_cov_diag` | `forecast_date` | VRA λ, eigen bias, condition numbers |
+| `ryan_sample_specific_risk` | `(id, forecast_date)` | Δ(t): `specific_var` (final) plus raw / shrunk stages |
+| `ryan_sample_bias_tests` | `(level, test, stage)` | 05's out-of-sample bias summary |
 
 ## What changed from the full-universe pipeline
 
@@ -189,33 +217,54 @@ off before any result is treated as an out-of-sample claim.
 **Descriptor weights are equal.** USE4 uses fitted weights within each factor.
 Equal weighting is a placeholder.
 
-## Not done yet — stages 4 and 5
+## The risk model — steps 5–7
 
-**Step 4 — factor and specific returns.** One cross-sectional WLS regression per
-month, weights ∝ √(market cap):
+Run order: `run_pipeline` → `02` → `03` → `04` → `05`. Then `06`–`08` are tools
+that read the stored model and can be run in any order, as often as you like.
+
+**Forecast-date convention.** F(t) and Δ(t) use data through eom *t* and forecast
+month *t + 1*. A portfolio held at the end of month *t* is priced with X(t), F(t),
+Δ(t), and every bias test pairs the forecast at *t* with the outcome at *t + 1*.
+240 months of factor returns on a 60-month window give 181 forecast dates, 180
+of them testable.
+
+**Σ is never materialized.** `RiskModel.variance(w)` computes
+`y = Xᵀw; yᵀFy + Σ w²δ`; the asset query uses one row of Σ, `X @ (F @ x_i)`; the
+optimizer's gradient is `X(F(Xᵀw)) + Δw`. 05 builds Σ once, only to verify these
+against it.
+
+### Out-of-sample results (bias statistic: 1 = calibrated; 95% band ≈ 1 ± 0.10)
+
+| | raw sample F | final F |
+|---|---|---|
+| min-variance, long-short (assets) | 1.18 | **1.07** |
+| min-variance, long-only ≤5% (assets) | 1.07 | **1.04** |
+| cap-weighted / equal-weighted / random portfolios | 0.98–1.02 | 1.00–1.03 |
+| smallest eigenportfolio (factors) | 2.04 | 1.35 |
+| single stocks, median monthly B_t | — | 0.88 (pooled 1.26; 1.007 excluding 9 of 28,072 \|z\|>10 months) |
+
+A single full-sample F scores 0.98 on the min-variance factor portfolio in
+sample, against 1.63 for the rolling raw F out of sample. That is handover
+decision #2 reproduced on real data.
+
+### Newey-West is implemented and OFF (`FACTOR_NW_LAGS = SPECIFIC_NW_LAGS = 0`)
+
+This departs from the original plan, based on measurement. Every added lag made F
+worse out of sample (smallest-eigenvector bias 2.15 → 2.55 → 2.99 → 3.52 for lags
+0–3, min-variance 1.65 → 3.12), and made Δ worse too (1.04 → 1.14). On 60 monthly
+observations the 18×18 lag cross-covariances are almost pure noise (factor lag-1
+|ρ| median 0.04), and adding noise to a covariance spreads its spectrum. Bartlett
+keeps the result PSD; it does not keep it right. USE4 affords NW because it
+estimates on daily data. 03 and 04 re-run the comparison on every execution.
+
+### Portfolio CSVs
 
 ```
-r_i = Σ_k X_ik f_k + u_i
+ticker,weight          # or `id` (permno); weight optional (equal weight);
+COST,0.08              # optional expected_return (annualized) for 07
 ```
 
-Industry dummies and style factors go into the *same* regression. The design
-matrix `[market | industries | styles]` is rank-deficient by construction — the
-industry dummies sum to the market's column of ones — so it needs USE4's
-cap-weighted constraint `Σ_i w_i f_i^ind = 0`. Pre-orthogonalizing the styles
-against the industry dummies does **not** fix this; the constraint is required
-either way.
-
-**Step 5 — the covariance matrix.**
-
-```
-Σ = X F Xᵀ + Δ
-```
-
-`F` is the covariance of **all** factor returns jointly — one `K×K` matrix, not
-separate industry and style matrices added together, which would drop every
-industry–style cross-covariance. `Δ` is diagonal specific variance, Newey-West
-adjusted for serial correlation in each asset's specific-return series and then
-Bayes-shrunk toward its size-decile mean. For an `Σ` destined for mean-variance
-optimization, add the Eigenfactor Risk Adjustment: the optimizer systematically
-loads into exactly the eigenportfolios whose risk the sample covariance
-understates.
+Only names in the sample can be priced: ~117 are alive at the latest date, and
+08 lists them. Tickers are resolved as-of the forecast date and carried forward
+from CRSP's name history, which ends at 2024-12 in this pull. Ambiguous or
+unknown tickers are reported, never guessed or silently dropped.

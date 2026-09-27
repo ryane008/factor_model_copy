@@ -8,6 +8,12 @@
 .env.production
 .env.development
 *.env
+# Any other .env variant (.env.old, .env.backup, ...). deprecated_docker/.env.old was
+# committed this way with live credentials. Only templates are ever committed.
+.env.*
+*.env.*
+!.env.template
+!**/.env.template*
 
 # WRDS cache and temporary files
 .wrds_cache/

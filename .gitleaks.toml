@@ -1,0 +1,33 @@
+# gitleaks configuration: default rules plus one for how this repo actually leaked.
+#
+# The WRDS password was committed as notebook OUTPUT ("DEBUG WRDS_PASSWORD set:
+# <value>"). gitleaks' built-in rules look for recognizable key formats and
+# high-entropy tokens, and missed it entirely: a history scan with the defaults
+# reported "no leaks found". The rule below catches a password-like key followed
+# by a literal value, while ignoring code that reads the value from somewhere
+# (os.environ, getenv, getpass, a variable name).
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "password-literal"
+description = "A password/secret key followed by a literal value (e.g. printed to notebook output or hardcoded)"
+regex = '''(?i)(?:wrds_?password|pg_?password|db_?password|passwd|password|secret)\b[\w ]{0,12}?\s*(?:[:=]|set:)[\s'",]{0,4}([A-Za-z0-9!@#$%^&*_+\-.~]{8,64})['"]?'''
+secretGroup = 1
+keywords = ["password", "passwd", "secret"]
+
+[[rules.allowlists]]
+description = "Values that are code or placeholders, not credentials"
+regexTarget = "secret"
+regexes = [
+  '''^(?i)(password|passwd|getpass|environ|os\.environ|getenv|none|null|true|false|required|optional|placeholder|changeme|your_?password|xxxxxxxx)$''',
+  '''^(?i)(postgres)$''',                   # docker-compose default, not a secret
+  '''^(?i)your[_\w]*$''',                  # template placeholders: your_wrds_password
+  '''^[\w]+\.[\w.]+$''',                       # attribute access like config.PASSWORD
+]
+
+[[rules.allowlists]]
+description = "Shell / compose interpolation, e.g. ${PGPASSWORD:-postgres}: a reference, not a value"
+regexTarget = "line"
+regexes = ['''\$\{\w+(:-[^}]*)?\}''']

@@ -443,6 +443,237 @@ naive_sigma = wr.std()
 check("ordinary sd is corrupted by the outlier, MAD is not", naive_sigma > 6.0,
       f"sd = {naive_sigma:.2f} vs MAD-sigma = {1.4826 * (wr - wr.median()).abs().median():.4f}")
 
+
+# ================================================================ riskmath
+import riskmath, factor_cov, specific_risk, riskmodel, optimizer
+
+print("\n=== riskmath: weights and Newey-West ===")
+w = riskmath.exp_weights(60, 12)
+check("exp weights sum to one, newest heaviest", abs(w.sum() - 1) < 1e-12 and w.argmax() == 59)
+check("weight halves every half-life", abs(w[59 - 12] / w[59] - 0.5) < 1e-12)
+check("half_life=None is equal weighting", np.allclose(riskmath.exp_weights(10, None), 0.1))
+check("NW rule of thumb floors 4(T/100)^(2/9): 3 at T=60, 4 at T=240 (4.86)",
+      riskmath.newey_west_lags(60) == 3 and riskmath.newey_west_lags(240) == 4)
+
+r_iid = rng.normal(0, 1, (60, 18))
+check("lags=0, equal weights == ML sample covariance",
+      np.allclose(riskmath.nw_cov(r_iid, None, 0), np.cov(r_iid.T, bias=True)))
+
+# The PSD guarantee is the reason for Bartlett weights, so prove the alternative
+# fails on the SAME data: a flat (truncated) kernel goes indefinite at T/K = 3.3.
+def truncated_kernel(r, lags):
+    z = (r - r.mean(0)) / np.sqrt(len(r))
+    s = z.T @ z
+    for l in range(1, lags + 1):
+        g = z[l:].T @ z[:-l]
+        s += g + g.T
+    return s
+check("Bartlett NW is PSD at T=60, K=18, L=5", riskmath.is_psd(riskmath.nw_cov(r_iid, None, 5)))
+check("...and the flat-kernel version on the same data is NOT (why Bartlett)",
+      not riskmath.is_psd(truncated_kernel(r_iid, 5)),
+      f"min eig {np.linalg.eigvalsh(truncated_kernel(r_iid, 5)).min():.3f}")
+check("Bartlett NW stays PSD with exponential weights (sqrt-weight construction)",
+      riskmath.is_psd(riskmath.nw_cov(r_iid, riskmath.exp_weights(60, 12), 5)))
+
+# NW's actual job: the long-run variance of an autocorrelated series.
+rho, n_ar = 0.5, 20_000
+e_ar = rng.normal(0, 1, n_ar)
+ar = np.empty(n_ar); ar[0] = e_ar[0]
+for i in range(1, n_ar):
+    ar[i] = rho * ar[i - 1] + e_ar[i]
+lr_true = (1 / (1 - rho**2)) * (1 + rho) / (1 - rho)          # = 4.0 for rho = .5
+v0 = riskmath.nw_cov(ar, None, 0)[0, 0]
+v30 = riskmath.nw_cov(ar, None, 30)[0, 0]
+check("NW recovers AR(1) long-run variance; plain variance does not",
+      abs(v30 / lr_true - 1) < 0.1 and v0 / lr_true < 0.4,
+      f"plain {v0:.2f}, NW(30) {v30:.2f}, true {lr_true:.2f}")
+
+# Panel version with gaps must equal the complete-data estimator on each column.
+panel_u = rng.normal(0, 0.05, (60, 5))
+wv = riskmath.exp_weights(60, 24)
+var_p, nobs = riskmath.nw_var_panel(panel_u, wv, 3)
+check("nw_var_panel == nw_cov column by column on complete data",
+      np.allclose(var_p, [riskmath.nw_cov(panel_u[:, [j]], wv, 3)[0, 0] for j in range(5)]))
+gappy = panel_u.copy(); gappy[:30, 0] = np.nan
+v_gap, n_gap = riskmath.nw_var_panel(gappy, wv, 0, min_obs=24)
+check("a gap renormalizes the weights over observed months (no dilution by zeros)",
+      np.isclose(v_gap[0], riskmath.nw_cov(panel_u[30:, [0]], wv[30:], 0)[0, 0]) and n_gap[0] == 30)
+check("below min_obs the variance is NaN, not a guess",      # rows 20-49: 20 observed
+      np.isnan(riskmath.nw_var_panel(gappy[20:50, :1], wv[20:50], 0, min_obs=24)[0][0]))
+
+vc = riskmath.vol_corr_cov(r_iid, 6, 48, 0, 0)
+check("vol/corr split: diagonal comes from the SHORT half-life",
+      np.allclose(np.diag(vc), np.diag(riskmath.nw_cov(r_iid, riskmath.exp_weights(60, 6), 0))))
+c48 = riskmath.nw_cov(r_iid, riskmath.exp_weights(60, 48), 0)
+sd48 = np.sqrt(np.diag(c48)); sdv = np.sqrt(np.diag(vc))
+check("vol/corr split: correlations come from the LONG half-life, and it is PSD",
+      np.allclose(vc / np.outer(sdv, sdv), c48 / np.outer(sd48, sd48)) and riskmath.is_psd(vc))
+
+print("\n=== riskmath: eigenfactor adjustment ===")
+# Truth with a spread-out spectrum, T/K = 60/18 like the rolling window.
+q_true, _ = np.linalg.qr(rng.normal(size=(18, 18)))
+f_true = (q_true * np.geomspace(1e-4, 4e-3, 18)) @ q_true.T
+sims_true, sims_est = [], []
+for _ in range(200):
+    rs = rng.multivariate_normal(np.zeros(18), f_true, size=60)
+    d_s, u_s = np.linalg.eigh(np.cov(rs.T, bias=True))
+    sims_true.append(u_s[:, 0] @ f_true @ u_s[:, 0]); sims_est.append(d_s[0])
+understate = np.mean(np.array(sims_true) / np.array(sims_est))
+check("the failure it fixes: sample min-eigenportfolio variance is understated at T/K=3.3",
+      understate > 1.5, f"true/estimated variance = {understate:.2f}")
+rs = rng.multivariate_normal(np.zeros(18), f_true, size=60)
+f_hat = np.cov(rs.T, bias=True)
+f_adj, info = riskmath.eigenfactor_adjust(f_hat, riskmath.exp_weights(60, None), n_sims=300, seed=1)
+check("simulated bias is largest for the smallest eigenvalue",
+      info["lam"][0] > 1.2 and info["lam"][0] > info["lam"][-1],
+      f"lambda smallest {info['lam'][0]:.2f}, largest {info['lam'][-1]:.2f}")
+d_adj = np.linalg.eigvalsh(f_adj)
+rot = info["u0"].T @ f_adj @ info["u0"]
+check("adjustment rescales eigenvalues but keeps eigenvectors (U0' F_adj U0 is diagonal)",
+      np.allclose(rot - np.diag(np.diag(rot)), 0, atol=1e-12 * np.abs(rot).max()))
+check("adjusted matrix is PSD and larger along the smallest eigenvector",
+      riskmath.is_psd(f_adj) and d_adj[0] > info["d0"][0])
+check("same seed, same answer",
+      np.allclose(f_adj, riskmath.eigenfactor_adjust(f_hat, riskmath.exp_weights(60, None), 300, seed=1)[0]))
+
+print("\n=== riskmath: VRA and windows ===")
+check("VRA is 1 until min_obs out-of-sample values exist",
+      riskmath.vra_multiplier(np.full(5, 4.0), 12, 12) == 1.0)
+check("VRA of a constant B^2 = 4 is 4 (vol x2)",
+      abs(riskmath.vra_multiplier(np.full(30, 4.0), 12, 12) - 4.0) < 1e-12)
+pos = list(riskmath.rolling_windows(240, 60))
+check("240 months, 60-month window -> 181 forecast dates, 180 testable", len(pos) == 181)
+check("every window ends AT its forecast position and is 60 long",
+      all(sl.stop == t + 1 and sl.stop - sl.start == 60 for t, sl in pos))
+check("window=None hands every date the FULL panel (the look-ahead diagnostic)",
+      all(sl == slice(0, 240) for _, sl in riskmath.rolling_windows(240, None, 60)))
+
+print("\n=== factor_cov ===")
+fr_idx = pd.date_range("2006-01-31", periods=90, freq="ME")
+fr_syn = pd.DataFrame(rng.multivariate_normal(np.zeros(18), f_true, size=90), index=fr_idx,
+                      columns=["market"] + [f"ind_{c}" for c in (10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60)]
+                      + list(config.STYLE_DESCRIPTORS))
+path_a = factor_cov.estimate(fr_syn, window=60, eigen_sims=50, verbose=False)
+fr_bumped = fr_syn.copy(); fr_bumped.iloc[-1] *= 25
+path_b = factor_cov.estimate(fr_bumped, window=60, eigen_sims=50, verbose=False)
+check("no look-ahead: blowing up the LAST month changes no earlier F(t)",
+      all(np.allclose(path_a.stages[s][:-1], path_b.stages[s][:-1]) for s in factor_cov.STAGES))
+check("...but does change the last one (the test can fail)",
+      not np.allclose(path_a.stages["final"][-1], path_b.stages["final"][-1]))
+check("every stage PSD at every date",
+      all(riskmath.is_psd(m) for s in factor_cov.STAGES for m in path_a.stages[s]))
+long_f = factor_cov.to_long(path_a).sample(frac=1, random_state=0)   # DB order is arbitrary
+back = factor_cov.from_long(long_f)
+check("long round-trip restores canonical order and values from shuffled rows",
+      list(back[path_a.dates[3]].columns) == path_a.factors
+      and np.allclose(back[path_a.dates[3]].to_numpy(), path_a.stages["final"][3]))
+check("both triangles stored (a reader never has to mirror)",
+      len(long_f) == len(path_a.dates) * 18 * 18)
+
+print("\n=== specific_risk: Bayesian shrinkage ===")
+sig = np.array([0.02, 0.03, 0.04, 0.30, 0.03, np.nan, 0.05, 0.035, 0.025, 0.045])
+caps = np.linspace(1, 10, 10)
+sh, vw, bk = specific_risk.shrink_to_size_buckets(sig, caps, 1, 0.1)
+prior = np.average(sig[np.isfinite(sig)], weights=caps[np.isfinite(sig)])
+check("the extreme vol is pulled toward the bucket mean", sh[3] < sig[3] and sh[3] > prior)
+check("shrink weight grows with distance from the prior",
+      vw[3] > vw[np.nanargmin(np.abs(sig - prior))])
+check("missing history takes the prior outright", vw[5] == 1.0 and np.isclose(sh[5], prior))
+check("shrinkage reduces cross-sectional dispersion",
+      np.nanstd(sh[np.isfinite(sig)]) < np.nanstd(sig))
+_, _, bk10 = specific_risk.shrink_to_size_buckets(np.full(100, .05), np.arange(1, 101.), 10, .1)
+check("10 size buckets of 10 on cap rank", np.bincount(bk10).tolist() == [10] * 10)
+
+print("\n=== riskmodel: Sigma never materialized, but equal to it ===")
+n_a, facs = 40, ["market", "ind_10", "ind_20", "value", "size"]
+x_df = pd.DataFrame({"market": 1.0, "ind_10": np.r_[np.ones(20), np.zeros(20)],
+                     "ind_20": np.r_[np.zeros(20), np.ones(20)],
+                     "value": rng.normal(size=n_a), "size": rng.normal(size=n_a)},
+                    index=np.arange(n_a, dtype=float))
+a5 = rng.normal(size=(5, 5)); f5 = a5 @ a5.T * 1e-3
+dl = pd.Series(rng.uniform(.002, .01, n_a), index=x_df.index)
+meta = pd.DataFrame({"ticker": [f"T{i}" for i in range(n_a)], "conm": "x", "sector_name": "s",
+                     "cap": rng.uniform(1, 100, n_a)}, index=x_df.index)
+rm_ = riskmodel.RiskModel(pd.Timestamp("2020-01-31"), pd.DataFrame(f5, facs, facs), x_df, dl, meta)
+sigma_full = x_df.to_numpy() @ f5 @ x_df.to_numpy().T + np.diag(dl)
+wp = pd.Series(rng.dirichlet(np.ones(n_a)), index=x_df.index)
+check("factor-space variance == w' Sigma w on the materialized Sigma",
+      np.isclose(rm_.variance(wp), 12 * wp.to_numpy() @ sigma_full @ wp.to_numpy()))
+check("cov_row == the row of Sigma", np.allclose(rm_.cov_row(3.0), 12 * sigma_full[3]))
+dec = rm_.decompose(wp)
+check("factor + specific contributions sum to total variance",
+      np.isclose(dec["by_group"]["var_contrib"].sum(), dec["total_vol"] ** 2))
+check("asset vol contributions sum to total vol (Euler)",
+      np.isclose(dec["by_asset"]["vol_contrib"].sum(), dec["total_vol"]))
+check("predicted beta of the market to itself is 1",
+      np.isclose(rm_.betas() @ rm_.market_weights(), 1.0))
+
+ex_rows = pd.DataFrame({"id": [1., 2., 3.], config.CAP_COL: [10., 20., 30.],
+                        "f_value": [np.nan, 1., 2.], "f_size": [0., 1., 2.],
+                        "ind_10": [1., 0., 0.], "ind_20": [0., 1., 0.]})
+xm = riskmodel.exposure_matrix(ex_rows, facs)
+check("missing style exposure is zero-filled, as in the regression",
+      1.0 in xm.index and xm.loc[1.0, "value"] == 0.0)
+check("a name with no industry is not priced (it was not regressed either)", 3.0 not in xm.index)
+
+# Ticker resolution: reused tickers must surface as ambiguous, not be guessed.
+exp_t = pd.DataFrame({
+    "id": [1., 1., 2., 2., 3., 3.],
+    "eom": pd.to_datetime(["2024-12-31", "2025-01-31"] * 3),
+    "ticker": ["AAA", None, "BBB", None, "BBB", None],
+    "conm": ["a", "a", "b", "b", "c", "c"], "sector_name": "s", config.CAP_COL: 1.0,
+})
+store_t = riskmodel.ModelStore.__new__(riskmodel.ModelStore)
+store_t.exposures = exp_t
+store_t._by_eom = {d: g for d, g in exp_t.groupby("eom")}
+store_t._ticker_hist = exp_t.loc[exp_t["ticker"].notna(), ["id", "eom", "ticker"]].sort_values("eom")
+store_t._ever_tickers = set(store_t._ticker_hist["ticker"].str.upper())
+store_t._tt_cache = {}
+store_t.dates = pd.DatetimeIndex(["2025-01-31"])
+res_t = store_t.resolve(["aaa", "BBB", "ZZZ", "2"], "2025-01-31")
+check("last known ticker carried forward past the end of CRSP names (case-insensitive)",
+      res_t.loc[0, "status"] == "ok" and res_t.loc[0, "id"] == 1.0)
+check("a ticker shared by two live ids is reported ambiguous, not guessed",
+      res_t.loc[1, "status"] == "ambiguous")
+check("unknown ticker -> not_in_sample; numeric input resolves as id",
+      res_t.loc[2, "status"] == "not_in_sample" and res_t.loc[3, "id"] == 2.0)
+
+print("\n=== optimizer ===")
+w_mv = optimizer.optimize(rm_, x_df.index, long_only=False, max_weight=10.0)
+inv1 = np.linalg.solve(sigma_full, np.ones(n_a))
+check("unconstrained min-variance == closed form Sigma^-1 1 / 1'Sigma^-1 1",
+      np.allclose(w_mv.to_numpy(), inv1 / inv1.sum(), atol=1e-5))
+check("Woodbury closed form == Sigma^-1 1 / 1'Sigma^-1 1 without inverting Sigma",
+      np.allclose(optimizer.min_variance_closed_form(rm_).to_numpy(), inv1 / inv1.sum()))
+w_lo = optimizer.optimize(rm_, x_df.index, long_only=True, max_weight=0.05)
+check("long-only min-var respects bounds and budget",
+      w_lo.min() >= -1e-9 and w_lo.max() <= 0.05 + 1e-6 and np.isclose(w_lo.sum(), 1))
+check("min-var beats equal weight", rm_.vol(w_lo) < rm_.vol(pd.Series(1 / n_a, x_df.index)))
+check("an infeasible cap raises instead of breaking the budget",
+      _raises(lambda: optimizer.optimize(rm_, x_df.index, max_weight=0.01)))
+# Projected gradient must land on the same unique optimum as SLSQP -- it is the
+# solver the full universe uses, where SLSQP cannot run at all.
+check("projected-gradient min-var == SLSQP min-var (long-only, capped)",
+      np.allclose(optimizer.optimize(rm_, x_df.index, max_weight=0.05, method="pg").to_numpy(),
+                  w_lo.to_numpy(), atol=2e-5))
+check("projected-gradient long-short == closed form",
+      np.allclose(optimizer.optimize(rm_, x_df.index, long_only=False, max_weight=10.0, method="pg").to_numpy(),
+                  inv1 / inv1.sum(), atol=2e-5))
+pv = optimizer.project_box_simplex(rng.normal(0, 1, 50), 0.0, 0.05)
+check("box-simplex projection: sums to one, respects bounds",
+      np.isclose(pv.sum(), 1) and pv.min() >= 0 and pv.max() <= 0.05 + 1e-12)
+feas = optimizer.project_box_simplex(np.full(50, 0.02), 0.0, 0.05)
+check("projection leaves a feasible point where it is", np.allclose(feas, 0.02))
+alpha_t = pd.Series(rng.normal(0.05, 0.03, n_a), index=x_df.index)
+check("projected-gradient mean-variance == SLSQP mean-variance",
+      np.allclose(optimizer.optimize(rm_, x_df.index, alpha_t, 2.0, max_weight=0.2, method="pg").to_numpy(),
+                  optimizer.optimize(rm_, x_df.index, alpha_t, 2.0, max_weight=0.2, method="slsqp").to_numpy(),
+                  atol=2e-5))
+w_hi = optimizer.optimize(rm_, x_df.index, alpha_t, risk_aversion=1.0, max_weight=0.2)
+w_lo2 = optimizer.optimize(rm_, x_df.index, alpha_t, risk_aversion=50.0, max_weight=0.2)
+check("lower risk aversion buys more expected return and more risk",
+      alpha_t @ w_hi > alpha_t @ w_lo2 and rm_.vol(w_hi) > rm_.vol(w_lo2))
+
 print("\n" + "=" * 60)
 print(f"{len(FAIL)} failure(s)" + (": " + ", ".join(FAIL) if FAIL else " — all checks passed"))
 sys.exit(1 if FAIL else 0)

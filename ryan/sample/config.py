@@ -7,6 +7,18 @@ one file. Nothing in this module touches the network or the database.
 
 from datetime import date
 
+# Which universe this config describes. ryan/universe/config.py loads this file
+# and overrides PROFILE, the table prefix and the membership rules; notebooks
+# there assert PROFILE != "sample" so a misconfigured path can never write into
+# the sample's tables.
+PROFILE = "sample"
+
+# Column in the exposures table flagging the names a user can query / hold (the
+# "coverage universe"), when that is narrower than the names the model is
+# ESTIMATED on. None = every estimated name is covered. The R1000 profile
+# estimates on a Russell 3000 proxy and sets this to "in_r1000".
+COVERAGE_COL = None
+
 # ---------------------------------------------------------------------------
 # Sampling design
 # ---------------------------------------------------------------------------
@@ -203,3 +215,115 @@ TBL_REGRESSION_PANEL = "ryan_sample_regression_panel"  # (id, eom) + exposure_eo
 TBL_FACTOR_RETURNS = "ryan_sample_factor_returns"  # f(t), long: (eom, factor)
 TBL_SPECIFIC_RETURNS = "ryan_sample_specific_returns"  # u(i,t), (id, eom)
 TBL_REGRESSION_DIAG = "ryan_sample_regression_diag"  # per-cross-section fit quality
+
+# ---------------------------------------------------------------------------
+# Step 5: factor covariance F(t)  (03_factor_covariance.ipynb)
+# ---------------------------------------------------------------------------
+
+# Rolling estimation window in months. 240 months of factor returns give 181
+# forecast dates, of which 180 have a following month to test against.
+#
+# Rolling rather than one full-sample F because a single F fitted on all 240
+# months is evaluated on the same months it was fitted to: a perfectly-specified
+# model with only 60-month estimation noise scores 0.992 in sample and 1.434 out
+# of sample. Set to None for that full-sample F at EVERY date -- look-ahead by
+# construction, kept only as the diagnostic that shows the gap.
+COV_WINDOW = 60
+
+# Half-lives in months. USE4 splits them for the reason in riskmath.vol_corr_cov:
+# 153 correlations need many observations, 18 vols need recent ones. USE4's daily
+# values (84d vol, 504d corr) translate to ~4 and ~24 months, but on MONTHLY data
+# a 4-month half-life leaves ~12 effective observations per vol, so both are
+# lengthened. At 24/48 the Kish effective sample is ~40 and ~53 of the 60 months.
+FACTOR_VOL_HALFLIFE = 24
+FACTOR_CORR_HALFLIFE = 48
+
+# Newey-West Bartlett lags for F. ZERO, deliberately -- measured, not assumed.
+#
+# The plan was the rule of thumb (3 on a 60-month window). Out of sample over
+# the 180 testable dates it makes F WORSE at every lag count, and it is the
+# only component that does (decay and the vol/corr split are neutral):
+#
+#     NW lags on F                 0      1      2      3
+#     smallest-eigvec bias       2.15   2.56   3.02   3.56    (no eigen adj.)
+#     min-variance ptf bias      1.65   2.12   2.61   3.08
+#     vol-only NW, factor bias   1.06   1.10   1.12   1.14
+#
+# Why: each lag term adds Gamma_l, an 18 x 18 cross-autocovariance estimated
+# from ~57 months. The true lag-1 autocorrelations of the factor returns are
+# small (mostly |rho| < 0.1), so Gamma_l is almost pure noise, and noise added
+# to a covariance spreads its spectrum -- the smallest eigenvalue falls from
+# 3.0e-5 to 1.1e-5. Bartlett keeps the result PSD; it does not keep it right.
+# USE4 can afford NW because it estimates on DAILY returns (thousands of
+# observations per window); on 60 monthly observations the signal is not there.
+# Set to None for the rule of thumb; 03 re-runs this comparison every time.
+FACTOR_NW_LAGS = 0
+
+# Eigenfactor adjustment. NOT optional at T/K = 60/18 = 3.3: the smallest sample
+# eigenvalues are understated by tens of percent, and those are the directions a
+# min-variance optimizer loads up on. 1000 sims for the stored run, 100 is fine
+# while iterating (the bias curve is smooth in rank).
+EIGEN_SIMS = 1000
+EIGEN_SCALE = 1.2      # USE4's a in gamma = a(lambda - 1) + 1
+EIGEN_SEED = 20260927
+
+# Volatility Regime Adjustment for F: scales the whole matrix by the recent
+# out-of-sample cross-sectional bias statistic of the factors. USE4 uses a 42-day
+# half-life on daily data; on monthly data each B_t is one noisy number from 18
+# factors, so the memory is 12 months and nothing is applied until 12
+# out-of-sample observations exist.
+VRA_HALFLIFE = 12
+VRA_MIN_OBS = 12
+
+# ---------------------------------------------------------------------------
+# Step 6: specific risk Delta(t)  (04_specific_risk.ipynb)
+# ---------------------------------------------------------------------------
+
+SPECIFIC_WINDOW = 60
+SPECIFIC_HALFLIFE = 24
+# Zero for the same measured reason as FACTOR_NW_LAGS. The lag-1 autocorrelation
+# of u is mildly negative (mean -0.047), so NW lowers each variance estimate --
+# but realized specific risk does not fall with it. Out of sample, pooled over
+# ~28k (asset, month) forecasts, before VRA:
+#     lags 0: bias 1.041 raw / 1.035 shrunk      lags 3: 1.138 / 1.125
+# None = rule of thumb on SPECIFIC_WINDOW (3); 04 re-runs the comparison.
+SPECIFIC_NW_LAGS = 0
+# An asset needs this many observed u's inside the window for its own estimate.
+# Below it the asset takes its size-bucket prior outright (shrinkage weight 1),
+# which is the honest answer for "not enough history" -- and in this fixed 2005
+# cohort it only bites around delisting / re-listing gaps.
+SPECIFIC_MIN_OBS = 24
+
+# Bayesian shrinkage toward the cap-weighted mean vol of the asset's size decile
+# (USE4 eq. 5-9). Corrects the over-dispersion of sample specific vols: the
+# highest estimates are high partly BECAUSE of estimation error. q is USE4's.
+SHRINK_Q = 0.1
+SHRINK_BUCKETS = 10
+
+SPECIFIC_VRA_HALFLIFE = 12
+SPECIFIC_VRA_MIN_OBS = 12
+
+# ---------------------------------------------------------------------------
+# Portfolio tools  (06_portfolio_risk, 07_mean_variance, 08_asset_query)
+# ---------------------------------------------------------------------------
+
+# Default portfolio CSV. Columns: `ticker` or `id` (permno), optional `weight`
+# (equal weight if absent), optional `expected_return` (annualized, used by 07).
+PORTFOLIO_CSV = "portfolios/example_portfolio.csv"
+
+# 07 default alpha when the CSV carries no expected_return: historical mean
+# STYLE factor returns x exposures, multiplied by this shrink factor. Mean factor
+# returns are the noisiest numbers in the model (value t = 2.1 is the best of
+# them), so this is an illustration of the machinery, not a forecast.
+ALPHA_PREMIA_SHRINK = 0.5
+MAX_WEIGHT = 0.10          # per-name cap in the optimizer
+RISK_AVERSION = 4.0        # lambda in  alpha'w - lambda/2 w'Sigma w  (annualized units)
+
+# ---------------------------------------------------------------------------
+# Step 5-7 tables
+# ---------------------------------------------------------------------------
+
+TBL_FACTOR_COV = "ryan_sample_factor_covariance"   # (forecast_date, factor_i, factor_j) -> cov
+TBL_FACTOR_COV_DIAG = "ryan_sample_factor_cov_diag" # per forecast date: VRA, eigen bias, cond
+TBL_SPECIFIC_RISK = "ryan_sample_specific_risk"    # (id, forecast_date) -> specific_var
+TBL_BIAS_TESTS = "ryan_sample_bias_tests"          # 05 summary
